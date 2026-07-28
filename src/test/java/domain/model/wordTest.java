@@ -10,10 +10,10 @@ public class wordTest {
   @Test
   @DisplayName("비교")
   void equalsTest(){
-    Word word1 = new word("apple");
-    Word word2 = new word("apple");
-    Word word3 = new word("aPPle");
-    Word word4 = new word("applg");
+    Word word1 = new Word("apple");
+    Word word2 = new Word("apple");
+    Word word3 = new Word("aPPle");
+    Word word4 = new Word("applg");
 
     assertThat(word1).isEqualTo(word2);
     assertThat(word1).isEqualTo(word3);
