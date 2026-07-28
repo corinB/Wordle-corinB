@@ -6,7 +6,7 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DictionaryTest {
+public class WordDictionaryTest {
 
   @Test
   @DisplayName("지금 시간을 기준으로 랜덤 단어 선택")
