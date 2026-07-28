@@ -8,10 +8,10 @@ public class wordleServiceTest {
 
   @Test
   @DisplayName("정답 검증 테스트 정답: apple")
-  void submitCorrectTest(){
+  void submitCorrectTest() {
     WordleService wordleService = new WordleService();
 
-    assertThat(wordleService.submit("apple"), true);
+    assertThat(wordleService.submit("apple")).isTrue();
   }
 
 
