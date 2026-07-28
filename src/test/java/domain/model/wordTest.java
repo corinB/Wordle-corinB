@@ -12,10 +12,11 @@ public class wordTest {
   void equalsTest(){
     Word word1 = new word("apple");
     Word word2 = new word("apple");
-    Word word3 = new word("applg");
+    Word word3 = new word("aPPle");
+    Word word4 = new word("applg");
 
     assertThat(word1).isEqualTo(word2);
-    assertThat(word1).isNotEqualTo(word3);
+    assertThat(word1).isEqualTo(word3);
+    assertThat(word1).isNotEqualTo(word4);
   }
-
 }
