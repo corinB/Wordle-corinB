@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class wordleServiceTest {
+public class WordleServiceTest {
 
   @Test
   @DisplayName("정답 검증 테스트")
