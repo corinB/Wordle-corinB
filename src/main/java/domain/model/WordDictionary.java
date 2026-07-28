@@ -1,14 +1,17 @@
 package domain.model;
 
 import domain.repository.WordRepository;
+
+import java.util.Objects;
 import java.util.Random;
 
-public class WordDictionary {
+public class WordDictionary<T extends WordRepository> {
 
-  private final WordRepository wordRepository;
 
-  public WordDictionary(WordRepository wordRepository) {
-    this.wordRepository = wordRepository;
+  private final T wordRepository;
+
+  public WordDictionary(T wordRepository) {
+    this.wordRepository = Objects.requireNonNull(wordRepository);
   }
 
   public Word chooseCorrectWord(long seed){
@@ -18,3 +21,4 @@ public class WordDictionary {
     );
   }
 }
+
