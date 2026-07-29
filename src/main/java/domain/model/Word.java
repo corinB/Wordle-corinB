@@ -2,6 +2,7 @@ package domain.model;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public record Word(String value) {
 
@@ -9,6 +10,8 @@ public record Word(String value) {
   private static final String YELLOW = "🟨";
   private static final String GREEN = "🟩";
   public static int WORD_LENGTH = 5;
+  private static final Pattern WORD_PATTERN =
+    Pattern.compile(String.format("^[a-zA-Z]{%d}$", WORD_LENGTH));
 
   public Word {
     if (!isValidWord(value)) {
@@ -18,7 +21,7 @@ public record Word(String value) {
   }
 
   private static boolean isValidWord(String word) {
-    return (word != null) && word.matches("^[a-zA-Z]{" + WORD_LENGTH + "}$");
+    return word != null && WORD_PATTERN.matcher(word).matches();
   }
 
 
