@@ -14,7 +14,7 @@ public class WordleServiceTest {
   @Test
   @DisplayName("정답 검증 테스트")
   void submitCorrectTest() {
-    WordleService wordleService = new WordleService(new WordDictionary(new MockWordRepository()));
+    WordleService wordleService = new WordleService(new MockWordRepository());
 
     wordleService.gameStart();
 
@@ -30,11 +30,6 @@ class MockWordRepository implements WordRepository {
   @Override
   public List<String> getAllWords() {
     return List.of("apple","cocoa","mania", "radar", "green");
-  }
-
-  @Override
-  public int getTotalWordsCNT() {
-    return 6;
   }
 }
 

@@ -6,13 +6,13 @@ import domain.repository.WordRepository;
 
 import java.time.Instant;
 
-public class WordleService<T extends WordRepository> {
+public class WordleService {
 
-  private final WordDictionary<T> dictionary;
+  private final WordDictionary dictionary;
   private Word correct;
 
-  public WordleService(WordDictionary<T> dictionary) {
-    this.dictionary = dictionary;
+  public WordleService(WordRepository wordRepository) {
+    this.dictionary = new WordDictionary(wordRepository);
   }
 
   void gameStart(){
