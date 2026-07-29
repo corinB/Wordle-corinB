@@ -1,30 +1,42 @@
 package application;
 
+import domain.model.GameBoard;
 import domain.model.Word;
 import domain.model.WordDictionary;
 import domain.repository.WordRepository;
 
 import java.time.Instant;
+import java.util.List;
 
 public class WordleService {
 
   private final WordDictionary dictionary;
-  private Word correct;
+  private GameBoard gameBoard;
 
   public WordleService(WordRepository wordRepository) {
     this.dictionary = new WordDictionary(wordRepository);
   }
 
-  void gameStart(){
+  public void gameStart() {
     long seed = Instant.now().getEpochSecond();
-    correct = dictionary.chooseCorrectWord(seed);
+    Word correct = dictionary.chooseCorrectWord(seed);
+
+    gameBoard = new GameBoard(correct);
   }
 
-  boolean submit(Word answer){
-    return correct.equals(answer);
+  public void submit(Word answer) {
+    gameBoard.submit(answer);
   }
 
   public Word getCorrect() {
-    return correct;
+    return gameBoard.getCorrect();
+  }
+
+  public List<String> getRecords() {
+    return gameBoard.getRecords();
+  }
+
+  public int getSpentChance() {
+    return gameBoard.getSpentChance();
   }
 }
