@@ -49,9 +49,9 @@ public class WordTest {
     Word answer3 = new Word("spell");
     Word answer4 = new Word("spill");
 
-    assertThat(correct.compareTo(answer1)).isEqualTo("⬜⬜🟨🟩⬜");
-    assertThat(correct.compareTo(answer2)).isEqualTo("🟨⬜⬜⬜🟩");
-    assertThat(correct.compareTo(answer3)).isEqualTo("🟩🟩⬜🟩🟩");
-    assertThat(correct.compareTo(answer4)).isEqualTo("🟩🟩🟩🟩🟩");
+    assertThat(correct.compare(answer1)).isEqualTo("⬜⬜🟨🟩⬜");
+    assertThat(correct.compare(answer2)).isEqualTo("🟨⬜⬜⬜🟩");
+    assertThat(correct.compare(answer3)).isEqualTo("🟩🟩⬜🟩🟩");
+    assertThat(correct.compare(answer4)).isEqualTo("🟩🟩🟩🟩🟩");
   }
 }
