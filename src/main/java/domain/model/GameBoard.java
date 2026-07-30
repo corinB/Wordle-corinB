@@ -29,8 +29,12 @@ public class GameBoard {
     }
   }
 
-  private boolean canSubmit() {
+  public boolean canSubmit() {
     return !correctFlag && records.size() < MAX_CHANCE;
+  }
+
+  public boolean isCorrect() {
+    return correctFlag;
   }
 
   public Word getCorrect() {

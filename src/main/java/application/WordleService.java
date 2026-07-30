@@ -28,6 +28,14 @@ public class WordleService {
     gameBoard.submit(answer);
   }
 
+  public boolean isFinished() {
+    return !gameBoard.canSubmit();
+  }
+
+  public boolean isCorrect() {
+    return gameBoard.isCorrect();
+  }
+
   public Word getCorrect() {
     return gameBoard.getCorrect();
   }

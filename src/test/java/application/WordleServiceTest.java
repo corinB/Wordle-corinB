@@ -64,6 +64,72 @@ public class WordleServiceTest {
   }
 
   @Test
+  @DisplayName("게임 시작 직후에는 진행 중")
+  void gameIsInProgressAfterStart() {
+    WordleService wordleService =
+      new WordleService(new MockWordRepository());
+
+    wordleService.gameStart();
+
+    assertThat(wordleService.isFinished())
+      .isFalse();
+    assertThat(wordleService.isCorrect())
+      .isFalse();
+  }
+
+  @Test
+  @DisplayName("오답 제출 후에는 진행 중")
+  void wrongAnswerKeepsGameInProgress() {
+    WordleService wordleService =
+      new WordleService(new MockWordRepository());
+
+    wordleService.gameStart();
+
+    wordleService.submit(findWrongAnswer(wordleService.getCorrect()));
+
+    assertThat(wordleService.isFinished())
+      .isFalse();
+    assertThat(wordleService.isCorrect())
+      .isFalse();
+  }
+
+  @Test
+  @DisplayName("정답 제출 후에는 종료")
+  void correctAnswerFinishesGame() {
+    WordleService wordleService =
+      new WordleService(new MockWordRepository());
+
+    wordleService.gameStart();
+
+    wordleService.submit(wordleService.getCorrect());
+
+    assertThat(wordleService.isFinished())
+      .isTrue();
+    assertThat(wordleService.isCorrect())
+      .isTrue();
+  }
+
+  @Test
+  @DisplayName("모든 기회 소진 후에는 종료")
+  void maxChanceFinishesGame() {
+    WordleService wordleService =
+      new WordleService(new MockWordRepository());
+
+    wordleService.gameStart();
+
+    Word wrongAnswer = findWrongAnswer(wordleService.getCorrect());
+
+    for (int i = 0; i < GameBoard.MAX_CHANCE; i++) {
+      wordleService.submit(wrongAnswer);
+    }
+
+    assertThat(wordleService.isFinished())
+      .isTrue();
+    assertThat(wordleService.isCorrect())
+      .isFalse();
+  }
+
+  @Test
   @DisplayName("정답 맞출 시 답변 제출 불가")
   void cannotSubmitAfterCorrectAnswer() {
     WordleService wordleService =
@@ -100,6 +166,15 @@ public class WordleServiceTest {
     assertThatThrownBy(() ->
       wordleService.submit(wrongAnswer)
     ).isInstanceOf(IllegalStateException.class);
+  }
+
+  private Word findWrongAnswer(Word correct) {
+    return new MockWordRepository().getAllWords()
+      .stream()
+      .map(Word::new)
+      .filter(word -> !word.equals(correct))
+      .findFirst()
+      .orElseThrow();
   }
 }
 
