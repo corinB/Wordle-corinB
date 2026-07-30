@@ -1,6 +1,7 @@
 package presentation;
 
 import application.WordleService;
+import domain.exception.InvalidWordException;
 import domain.model.GameBoard;
 import domain.model.Word;
 
@@ -51,7 +52,7 @@ public class CLIController {
     try {
       wordleService.submit(new Word(answer));
       printInProgressRecords();
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidWordException e) {
       printWarning();
     }
   }

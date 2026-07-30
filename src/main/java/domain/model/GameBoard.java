@@ -3,6 +3,8 @@ package domain.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import static domain.exception.DomainErrorType.GAME_ALREADY_FINISHED;
+
 public class GameBoard {
 
   public static final int MAX_CHANCE = 6;
@@ -19,7 +21,7 @@ public class GameBoard {
 
   public void submit(Word answer) {
     if (!canSubmit()) {
-      throw new IllegalStateException("끝난 게임입니다.");
+      throw GAME_ALREADY_FINISHED.createException();
     }
 
     records.add(correct.compare(answer));

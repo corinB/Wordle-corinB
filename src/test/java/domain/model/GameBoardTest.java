@@ -1,5 +1,6 @@
 package domain.model;
 
+import domain.exception.GameAlreadyFinishedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +71,7 @@ public class GameBoardTest {
 
     assertThatThrownBy(() ->
       gameBoard.submit(new Word("hello"))
-    ).isInstanceOf(IllegalStateException.class);
+    ).isInstanceOf(GameAlreadyFinishedException.class);
   }
 
   @Test
@@ -88,7 +89,7 @@ public class GameBoardTest {
 
     assertThatThrownBy(() ->
       gameBoard.submit(wrongAnswer)
-    ).isInstanceOf(IllegalStateException.class);
+    ).isInstanceOf(GameAlreadyFinishedException.class);
   }
 
   @Test

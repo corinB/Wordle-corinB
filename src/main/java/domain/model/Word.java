@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static domain.exception.DomainErrorType.INVALID_WORD;
+
 public record Word(String value) {
 
   private static final String WHITE = "⬜";
@@ -15,7 +17,7 @@ public record Word(String value) {
 
   public Word {
     if (!isValidWord(value)) {
-      throw new IllegalArgumentException("5글자 영어 알파벳만 입력할 수 있습니다.");
+      throw INVALID_WORD.createException();
     }
     value = value.toLowerCase(); // 소문자 정규화
   }

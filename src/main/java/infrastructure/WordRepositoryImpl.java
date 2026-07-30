@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static infrastructure.exception.InfrastructureErrorType.WORD_FILE_NOT_FOUND;
+import static infrastructure.exception.InfrastructureErrorType.WORD_FILE_READ_FAILED;
+
 public class WordRepositoryImpl implements WordRepository {
 
   private static final String WORD_FILE_PATH = "/words.txt";
@@ -19,9 +22,7 @@ public class WordRepositoryImpl implements WordRepository {
       WordRepositoryImpl.class.getResourceAsStream(WORD_FILE_PATH);
 
     if (inputStream == null) {
-      throw new IllegalStateException(
-        "단어 파일을 찾을 수 없습니다: " + WORD_FILE_PATH
-      );
+      throw WORD_FILE_NOT_FOUND.createException(WORD_FILE_PATH);
     }
 
     try (BufferedReader reader = new BufferedReader(
@@ -34,7 +35,7 @@ public class WordRepositoryImpl implements WordRepository {
         .toList();
 
     } catch (IOException e) {
-      throw new IllegalStateException("단어 파일을 읽지 못했습니다.", e);
+      throw WORD_FILE_READ_FAILED.createException(e);
     }
   }
 }
