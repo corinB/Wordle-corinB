@@ -1,4 +1,5 @@
 package application;
+import domain.exception.GameAlreadyFinishedException;
 import domain.model.GameBoard;
 import domain.model.Word;
 import domain.repository.WordRepository;
@@ -143,7 +144,7 @@ public class WordleServiceTest {
 
     assertThatThrownBy(() ->
       wordleService.submit(new Word("aaaaa"))
-    ).isInstanceOf(IllegalStateException.class);
+    ).isInstanceOf(GameAlreadyFinishedException.class);
   }
 
   @Test
@@ -165,7 +166,7 @@ public class WordleServiceTest {
 
     assertThatThrownBy(() ->
       wordleService.submit(wrongAnswer)
-    ).isInstanceOf(IllegalStateException.class);
+    ).isInstanceOf(GameAlreadyFinishedException.class);
   }
 
   private Word findWrongAnswer(Word correct) {
