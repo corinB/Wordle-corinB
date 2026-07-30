@@ -12,6 +12,7 @@ public record Word(String value) {
   private static final String YELLOW = "🟨";
   private static final String GREEN = "🟩";
   public static int WORD_LENGTH = 5;
+  //단어 입력 패턴
   private static final Pattern WORD_PATTERN =
     Pattern.compile(String.format("^[a-zA-Z]{%d}$", WORD_LENGTH));
 
@@ -22,11 +23,13 @@ public record Word(String value) {
     value = value.toLowerCase(); // 소문자 정규화
   }
 
+  //벨리데이션
   private static boolean isValidWord(String word) {
     return word != null && WORD_PATTERN.matcher(word).matches();
   }
 
 
+  //단어 비교해 타일 반환
   public String compare(Word answer) {
     if (this.equals(answer)) {
       return GREEN.repeat(WORD_LENGTH);
@@ -35,9 +38,12 @@ public record Word(String value) {
     String[] results = new String[WORD_LENGTH];
     int[] remainingLetters = new int[26];
 
+    //흰색 체우기
     Arrays.fill(results, WHITE);
 
+    //초록 판단
     evaluateGreen(answer, results, remainingLetters);
+    //노랑 판단
     evaluateYellow(answer, results, remainingLetters);
 
     return String.join("", results);
