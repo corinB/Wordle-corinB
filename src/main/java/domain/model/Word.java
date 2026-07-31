@@ -40,7 +40,6 @@ public record Word(String value) {
 
     //흰색 체우기
     Arrays.fill(results, WHITE);
-
     //초록 판단
     evaluateGreen(answer, results, remainingLetters);
     //노랑 판단
@@ -78,17 +77,5 @@ public record Word(String value) {
         remainingLetters[alphabetIndex]--;
       }
     }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) return false;
-    Word word = (Word) o;
-    return Objects.equals(value, word.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(value);
   }
 }
