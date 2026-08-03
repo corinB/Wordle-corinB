@@ -19,13 +19,13 @@ public class Dictionary {
   }
 
 
-  public Dictionary(List<Word> words, CorrectSelector correctSelector) {
+  public Dictionary(List<Word> words, final CorrectSelector correctSelector) {
     this.words = words;
     this.correctSelector = correctSelector;
   }
 
-  public Dictionary(final String... words) {
-    this(Arrays.stream(words).map(Word::new).toList(), new RandomCorrectSelector());
+  public Dictionary(final CorrectSelector correctSelector,final String... words) {
+    this(Arrays.stream(words).map(Word::new).toList(), correctSelector);
   }
 
   //씨드 기준으로 랜덤 단어 고르기
