@@ -1,5 +1,6 @@
 package domain.model;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -20,9 +21,14 @@ public class Dictionary {
   }
 
   //씨드 기준으로 랜덤 단어 고르기
-  public Word chooseCorrectWord(long seed) {
+  public Word  correct(long seed) {
     final Random random = new Random(seed);
     return words.get(random.nextInt(words.size()));
+  }
+
+  public Word correct(){
+    long seed = Instant.now().getEpochSecond();
+    return  this.correct(seed);
   }
 }
 
