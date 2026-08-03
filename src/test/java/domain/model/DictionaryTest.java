@@ -3,13 +3,11 @@ package domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
-import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class WordDictionaryTest {
+public class DictionaryTest {
 
 
   @RepeatedTest(100)
@@ -19,7 +17,7 @@ public class WordDictionaryTest {
     long seed1 = 1L;
     long seed2 = 2L;
 
-    WordDictionary dictionary = new WordDictionary("apple", "apple", "white");
+    Dictionary dictionary = new Dictionary("apple", "apple", "white");
 
     Word word1 = dictionary.chooseCorrectWord(seed1);
     Word word2 = dictionary.chooseCorrectWord(seed1);

@@ -1,26 +1,21 @@
 package domain.model;
 
-import domain.repository.WordRepository;
-
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
-
 
 
 //WordDictionary 상테랑 행위만 가짐
 //서비스에 넣으려다가 핵심비즈니스 인것 같아서 기능이 하나인거 같지만 도메인으로 뺌
-public class WordDictionary {
+public class Dictionary {
 
   private final List<Word> words;
 
-  public WordDictionary(List<Word> words) {
+  public Dictionary(List<Word> words) {
     this.words = words;
   }
 
-  public  WordDictionary(final String... words) {
+  public Dictionary(final String... words) {
     this(Arrays.stream(words).map(Word::new).toList());
   }
 

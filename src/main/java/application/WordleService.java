@@ -2,7 +2,7 @@ package application;
 
 import domain.model.GameBoard;
 import domain.model.Word;
-import domain.model.WordDictionary;
+import domain.model.Dictionary;
 import domain.repository.WordRepository;
 
 import java.time.Instant;
@@ -10,11 +10,11 @@ import java.util.List;
 
 public class WordleService {
 
-  private final WordDictionary dictionary;
+  private final Dictionary dictionary;
   private GameBoard gameBoard;
 
   public WordleService(WordRepository wordRepository) {
-    this.dictionary = new WordDictionary(
+    this.dictionary = new Dictionary(
       wordRepository.getAllWords()
         .stream()
         .map(Word::new)
