@@ -11,13 +11,21 @@ import java.util.Random;
 public class Dictionary {
 
   private final List<Word> words;
+  private final CorrectSelector correctSelector;
+
 
   public Dictionary(List<Word> words) {
+    this(words,new RandomCorrectSelector() );
+  }
+
+
+  public Dictionary(List<Word> words, CorrectSelector correctSelector) {
     this.words = words;
+    this.correctSelector = correctSelector;
   }
 
   public Dictionary(final String... words) {
-    this(Arrays.stream(words).map(Word::new).toList());
+    this(Arrays.stream(words).map(Word::new).toList(), new RandomCorrectSelector());
   }
 
   //씨드 기준으로 랜덤 단어 고르기
@@ -27,8 +35,7 @@ public class Dictionary {
   }
 
   public Word correct(){
-    long seed = Instant.now().getEpochSecond();
-    return  this.correct(seed);
+    return correctSelector.select(words);
   }
 }
 

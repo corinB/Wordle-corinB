@@ -17,11 +17,11 @@ public class DictionaryTest {
     long seed1 = 1L;
     long seed2 = 2L;
 
-    Dictionary dictionary = new Dictionary("apple", "apple", "white");
+    Dictionary dictionary = new Dictionary("apple", "white", "green");
 
-    Word word1 = dictionary.chooseCorrectWord(seed1);
-    Word word2 = dictionary.chooseCorrectWord(seed1);
-    Word word3 = dictionary.chooseCorrectWord(seed2);
+    Word word1 = dictionary.correct(seed1);
+    Word word2 = dictionary.correct(seed1);
+    Word word3 = dictionary.correct(seed2);
 
     assertAll(
       () -> assertThat(word1).isEqualTo(word2),

@@ -14,12 +14,7 @@ public class WordleService {
   private GameBoard gameBoard;
 
   public WordleService(WordRepository wordRepository) {
-    this.dictionary = new Dictionary(
-      wordRepository.getAllWords()
-        .stream()
-        .map(Word::new)
-        .toList()
-    );
+    this.dictionary = new Dictionary(wordRepository.getAllWords().stream().map(Word::new).toList());
   }
 
   //게임 시장
