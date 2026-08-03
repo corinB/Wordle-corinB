@@ -2,26 +2,36 @@ package domain.model;
 
 import domain.repository.WordRepository;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+
+
+//WordDictionary 상테랑 행위만 가짐
 //서비스에 넣으려다가 핵심비즈니스 인것 같아서 기능이 하나인거 같지만 도메인으로 뺌
 public class WordDictionary {
 
-  private final WordRepository wordRepository;
+  private final List<Word> words;
 
   public WordDictionary(WordRepository wordRepository) {
-    this.wordRepository = wordRepository;
+    this(wordRepository.getAllWords().stream().map(Word::new).toList());
+  }
+
+  public WordDictionary(List<Word> words) {
+    this.words = words;
+  }
+
+  public  WordDictionary(final String... words) {
+    this(Arrays.stream(words).map(Word::new).toList());
   }
 
   //씨드 기준으로 랜덤 단어 고르기
   public Word chooseCorrectWord(long seed) {
-    List<String> words = wordRepository.getAllWords();
-    Random random = new Random(seed);
-
-    return new Word(
-      words.get(random.nextInt(words.size()))
-    );
+    final Random random = new Random(seed);
+    return words.get(random.nextInt(words.size()));
   }
 }
 
