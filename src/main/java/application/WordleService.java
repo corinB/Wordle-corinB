@@ -24,11 +24,8 @@ public class WordleService {
 
   //게임 시장
   public void gameStart() {
-    long seed = Instant.now().getEpochSecond();
-    //단어 고르기
-    Word correct = dictionary.chooseCorrectWord(seed);
     //게임 셋팅(게임보드에 정답 기록)
-    gameBoard = new GameBoard(correct);
+    gameBoard = new GameBoard(dictionary.correct());
   }
 
   //응답 제출
