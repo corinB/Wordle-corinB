@@ -16,10 +16,6 @@ public class WordDictionary {
 
   private final List<Word> words;
 
-  public WordDictionary(WordRepository wordRepository) {
-    this(wordRepository.getAllWords().stream().map(Word::new).toList());
-  }
-
   public WordDictionary(List<Word> words) {
     this.words = words;
   }
