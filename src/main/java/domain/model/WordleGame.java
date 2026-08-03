@@ -1,29 +1,20 @@
-package application;
+package domain.model;
 
-import domain.model.GameBoard;
-import domain.model.Word;
-import domain.model.WordDictionary;
-import domain.repository.WordRepository;
-
-import java.time.Instant;
 import java.util.List;
 
-public class WordleService {
+public class WordleGame {
 
-  private final WordDictionary dictionary;
+  private final Dictionary dictionary;
   private GameBoard gameBoard;
 
-  public WordleService(WordRepository wordRepository) {
-    this.dictionary = new WordDictionary(wordRepository);
+  public WordleGame(List<Word> words) {
+    this.dictionary = new Dictionary(words);
   }
 
   //게임 시장
   public void gameStart() {
-    long seed = Instant.now().getEpochSecond();
-    //단어 고르기
-    Word correct = dictionary.chooseCorrectWord(seed);
     //게임 셋팅(게임보드에 정답 기록)
-    gameBoard = new GameBoard(correct);
+    gameBoard = new GameBoard(dictionary.correct());
   }
 
   //응답 제출
