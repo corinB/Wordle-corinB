@@ -1,6 +1,6 @@
 package infrastructure;
 
-import domain.repository.WordRepository;
+import domain.model.Words;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,14 +12,14 @@ import java.util.List;
 import static infrastructure.exception.InfrastructureErrorType.WORD_FILE_NOT_FOUND;
 import static infrastructure.exception.InfrastructureErrorType.WORD_FILE_READ_FAILED;
 
-public class WordRepositoryImpl implements WordRepository {
+public class WordsImpl implements Words {
 
   private static final String WORD_FILE_PATH = "/words.txt";
 
   @Override
-  public List<String> getAllWords() {
+  public List<String> findAll() {
     InputStream inputStream =
-      WordRepositoryImpl.class.getResourceAsStream(WORD_FILE_PATH);
+      WordsImpl.class.getResourceAsStream(WORD_FILE_PATH);
 
     if (inputStream == null) {
       throw WORD_FILE_NOT_FOUND.createException(WORD_FILE_PATH);

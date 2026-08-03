@@ -1,20 +1,14 @@
-package application;
+package domain.model;
 
-import domain.model.GameBoard;
-import domain.model.Word;
-import domain.model.Dictionary;
-import domain.repository.WordRepository;
-
-import java.time.Instant;
 import java.util.List;
 
-public class WordleService {
+public class WordleGame {
 
   private final Dictionary dictionary;
   private GameBoard gameBoard;
 
-  public WordleService(WordRepository wordRepository) {
-    this.dictionary = new Dictionary(wordRepository.getAllWords().stream().map(Word::new).toList());
+  public WordleGame(List<Word> words) {
+    this.dictionary = new Dictionary(words);
   }
 
   //게임 시장

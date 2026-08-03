@@ -1,9 +1,10 @@
 package presentation;
 
-import application.WordleService;
+import domain.model.WordleGame;
 import domain.exception.InvalidWordException;
 import domain.model.GameBoard;
 import domain.model.Word;
+import domain.model.Words;
 
 import java.io.PrintStream;
 import java.util.Scanner;
@@ -16,23 +17,26 @@ import static presentation.GameScript.Script.WARNING;
 
 public class CLIController {
 
-  private final WordleService wordleService;
+  private final WordleGame wordleGame;
   private final Scanner scanner;
   private final PrintStream output;
 
-  public CLIController(WordleService wordleService, Scanner scanner, PrintStream output) {
-    this.wordleService = wordleService;
+  public CLIController(Words repository, Scanner scanner, PrintStream output) {
     this.scanner = scanner;
     this.output = output;
+    this.wordleGame = new WordleGame(repository
+      .findAll().stream()
+      .map(Word::new).toList()
+    );
   }
 
   public void run() {
     //게임 시작
-    wordleService.gameStart();
+    wordleGame.gameStart();
     printStartMessage();
 
     //안끝났음 반복
-    while (!wordleService.isFinished()) {
+    while (!wordleGame.isFinished()) {
       requestAnswer();
     }
 
@@ -55,7 +59,7 @@ public class CLIController {
   //이력된 정답 서비스로 전달
   private void submit(String answer) {
     try {
-      wordleService.submit(new Word(answer));
+      wordleGame.submit(new Word(answer));
       printInProgressRecords();
     } catch (InvalidWordException e) {
       printWarning();
@@ -64,7 +68,7 @@ public class CLIController {
 
   // 채점 결고과 (아직 안끝났을때)
   private void printInProgressRecords() {
-    if (wordleService.isFinished()) {
+    if (wordleGame.isFinished()) {
       return;
     }
 
@@ -84,7 +88,7 @@ public class CLIController {
   private void printResult() {
     output.println();
     // 정답 마추면 결과 출력
-    if (wordleService.isCorrect()) {
+    if (wordleGame.isCorrect()) {
       printScore();
       return;
     }
@@ -96,7 +100,7 @@ public class CLIController {
   private void printScore() {
     output.println(String.format(
       END_POSITIVE.getMessage(),
-      wordleService.getSpentChance(),
+      wordleGame.getSpentChance(),
       GameBoard.MAX_CHANCE
     ));
     output.println();
@@ -104,7 +108,7 @@ public class CLIController {
 
   //채점기록 출력
   private void printRecords() {
-    wordleService.getRecords()
+    wordleGame.getRecords()
       .forEach(output::println);
   }
 }
