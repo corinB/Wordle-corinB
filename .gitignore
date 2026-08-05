@@ -42,3 +42,31 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Windows ###
+Thumbs.db
+Desktop.ini
+
+### Logs ###
+logs/
+*.log
+
+### Local environment ###
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+src/main/resources/application-local.yaml
+src/main/resources/application-dev.yaml
+src/main/resources/application-secret.properties
+src/main/resources/application-secret.yml
+src/main/resources/application-secret.yaml
+
+### Docker ###
+docker-compose.override.yml
+compose.override.yml
+
+### JVM ###
+hs_err_pid*
+replay_pid*

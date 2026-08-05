@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: wordle-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wordle
+      POSTGRES_USER: wordle
+      POSTGRES_PASSWORD: wordle
+      TZ: Asia/Seoul
+    ports:
+      - "5432:5432"
+    volumes:
+      - wordle-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wordle -d wordle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  wordle-postgres-data:
