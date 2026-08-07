@@ -18,37 +18,25 @@ public class WordRepositoryImpl implements WordRepository {
   private final WordJPARepository wordJPARepository;
 
   @Override
-  public Optional<Word> findByWord(String value) {
-    return wordJPARepository.findByValue(value).map(WordEntity::toDomain);
-  }
-
-  @Override
   public Optional<Word> findByWord(Word word) {
-    return findByWord(word.value());
-  }
-
-  @Override
-  public Word save(String value) {
-    return wordJPARepository.save(WordEntity.create(value)).toDomain();
+    return wordJPARepository.findByValue(word.value())
+      .map(WordEntity::toDomain);
   }
 
   @Override
   public Word save(Word word) {
-    return save(word.value());
-  }
-
-  @Override
-  public void delete(String value) {
-    wordJPARepository.deleteByValue(value);
+    return wordJPARepository.save(WordEntity.create(word)).toDomain();
   }
 
   @Override
   public void delete(Word word) {
-    delete(word.value());
+    wordJPARepository.deleteByValue(word.value());
   }
 
   @Override
   public List<Word> findAll() {
-    return wordJPARepository.findAll().stream().map(WordEntity::toDomain).toList();
+    return wordJPARepository.findAll().stream()
+      .map(WordEntity::toDomain)
+      .toList();
   }
 }

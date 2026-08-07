@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "words")
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // PRIVATE -> PROTECTED로 변경
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WordEntity {
 
   @Id
@@ -24,10 +24,6 @@ public class WordEntity {
     WordEntity entity = new WordEntity();
     entity.value = word.value();
     return entity;
-  }
-
-  public static WordEntity create(String value){
-    return create(new Word(value));
   }
 
   // Entity -> Domain

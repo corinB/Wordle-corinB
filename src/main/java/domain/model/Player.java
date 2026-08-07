@@ -39,6 +39,10 @@ public final class Player {
     return nickname;
   }
 
+  public EncodedPassword getEncodedPassword() {
+    return encodedPassword;
+  }
+
   public boolean matchesPassword(
     String rawPassword,
     PasswordMatcher passwordMatcher
