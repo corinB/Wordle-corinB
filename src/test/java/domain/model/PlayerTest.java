@@ -4,14 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import domain.model.vo.Email;
+import domain.model.vo.EncodedPassword;
+import domain.model.vo.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class PlayerTest {
 
-  private static final String VALID_NICK = "corinB";
-  private static final String VALID_EMAIL = "corin@example.com";
-  private static final String ENCODED_PASSWORD = "encoded:password123";
+  private static final Nickname VALID_NICK = new Nickname("corinB");
+  private static final Email VALID_EMAIL = new Email("corin@example.com");
+  private static final EncodedPassword ENCODED_PASSWORD = new EncodedPassword("encoded:password123");
 
   @Test
   @DisplayName("조건에 맞는 값으로 Player를 생성한다")
@@ -23,7 +26,7 @@ class PlayerTest {
     );
 
     assertAll(
-      () -> assertThat(player.getNick())
+      () -> assertThat(player.getNickname())
         .isEqualTo(VALID_NICK),
       () -> assertThat(player.getEmail())
         .isEqualTo(VALID_EMAIL)
@@ -37,24 +40,24 @@ class PlayerTest {
       () -> assertThatThrownBy(() ->
         Player.create(
           "a",
-          VALID_EMAIL,
-          ENCODED_PASSWORD
+          VALID_EMAIL.value(),
+          ENCODED_PASSWORD.value()
         )
       ).isInstanceOf(IllegalArgumentException.class),
 
       () -> assertThatThrownBy(() ->
         Player.create(
           "abcdefghijklm",
-          VALID_EMAIL,
-          ENCODED_PASSWORD
+          VALID_EMAIL.value(),
+          ENCODED_PASSWORD.value()
         )
       ).isInstanceOf(IllegalArgumentException.class),
 
       () -> assertThatThrownBy(() ->
         Player.create(
           "백종현",
-          VALID_EMAIL,
-          ENCODED_PASSWORD
+          VALID_EMAIL.value(),
+          ENCODED_PASSWORD.value()
         )
       ).isInstanceOf(IllegalArgumentException.class)
     );

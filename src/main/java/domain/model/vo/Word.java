@@ -1,7 +1,6 @@
-package domain.model;
+package domain.model.vo;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static domain.exception.DomainErrorType.INVALID_WORD;

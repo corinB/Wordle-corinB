@@ -1,5 +1,7 @@
 package domain.model;
 
+import domain.model.vo.Word;
+
 import java.util.List;
 
 public class WordleGame {
@@ -9,10 +11,6 @@ public class WordleGame {
 
   public WordleGame(List<Word> words) {
     this.dictionary = new Dictionary(words);
-  }
-
-  public WordleGame(Words words){
-    this(words.findAll().stream().map(Word::new).toList());
   }
 
   //게임 시장

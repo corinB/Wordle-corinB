@@ -1,6 +1,7 @@
 package domain.model;
 
-import java.time.Instant;
+import domain.model.vo.Word;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;

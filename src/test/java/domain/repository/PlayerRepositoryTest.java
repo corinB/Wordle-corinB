@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import domain.model.Player;
+import domain.model.vo.Email;
+import domain.model.vo.Nickname;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,7 +85,7 @@ class PlayerRepositoryTest {
 
     @Override
     public Player save(Player player) {
-      playersByEmail.put(player.getEmail(), player);
+      playersByEmail.put(player.getEmail().value(), player);
       return player;
     }
 
@@ -101,7 +103,22 @@ class PlayerRepositoryTest {
     public boolean existsByNick(String nick) {
       return playersByEmail.values()
         .stream()
-        .anyMatch(player -> player.getNick().equals(nick));
+        .anyMatch(player -> player.getNickname().value().equals(nick));
+    }
+
+    @Override
+    public Optional<Player> findByEmail(Email email) {
+      return findByEmail(email.value());
+    }
+
+    @Override
+    public boolean existsByEmail(Email email) {
+      return existsByEmail(email.value());
+    }
+
+    @Override
+    public boolean existsByNick(Nickname nick) {
+      return existsByNick(nick.value());
     }
   }
 }
