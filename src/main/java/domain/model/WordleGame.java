@@ -1,5 +1,7 @@
 package domain.model;
 
+import domain.model.vo.Word;
+
 import java.util.List;
 
 public class WordleGame {

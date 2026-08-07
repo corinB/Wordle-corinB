@@ -1,7 +1,7 @@
 package application;
 import domain.exception.GameAlreadyFinishedException;
 import domain.model.GameBoard;
-import domain.model.Word;
+import domain.model.vo.Word;
 import domain.model.WordleGame;
 import domain.model.Words;
 import org.junit.jupiter.api.DisplayName;

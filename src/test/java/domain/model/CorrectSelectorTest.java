@@ -1,5 +1,6 @@
 package domain.model;
 
+import domain.model.vo.Word;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 
@@ -7,7 +8,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CorrectSelectorTest {
 

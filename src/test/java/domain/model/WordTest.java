@@ -1,5 +1,6 @@
 package domain.model;
 import domain.exception.InvalidWordException;
+import domain.model.vo.Word;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

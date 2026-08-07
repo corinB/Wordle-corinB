@@ -3,7 +3,7 @@ package presentation;
 import domain.model.WordleGame;
 import domain.exception.InvalidWordException;
 import domain.model.GameBoard;
-import domain.model.Word;
+import domain.model.vo.Word;
 import domain.model.Words;
 
 import java.io.PrintStream;
