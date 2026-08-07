@@ -13,10 +13,6 @@ public class WordleGame {
     this.dictionary = new Dictionary(words);
   }
 
-  public WordleGame(Words words){
-    this(words.findAll().stream().map(Word::new).toList());
-  }
-
   //게임 시장
   public void gameStart() {
     //게임 셋팅(게임보드에 정답 기록)
