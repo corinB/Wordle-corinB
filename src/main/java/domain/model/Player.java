@@ -15,17 +15,28 @@ public final class Player {
   private final EncodedPassword encodedPassword;
 
   public Player(Nickname nickname, Email email, EncodedPassword password) {
+
+    if (nickname == null) {
+      throw new IllegalArgumentException("닉네임은 필수입니다.");
+    }
+    if (email == null) {
+      throw new IllegalArgumentException("이메일은 필수입니다.");
+    }
+    if (password == null) {
+      throw new IllegalArgumentException("비밀번호는 필수입니다.");
+    }
+
     this.nickname = nickname;
     this.email = email;
     this.encodedPassword = password;
   }
 
-  public String getNick() {
-    return nickname.value();
+  public Email getEmail() {
+    return email;
   }
 
-  public String getEmail() {
-    return email.value();
+  public Nickname getNickname() {
+    return nickname;
   }
 
   public boolean matchesPassword(
@@ -45,5 +56,13 @@ public final class Player {
       new Email(email),
       new EncodedPassword(encodedPassword)
     );
+  }
+
+  public static Player create(
+    Nickname nickname,
+    Email email,
+    EncodedPassword encodedPassword
+  ){
+    return new Player(nickname,email,encodedPassword);
   }
 }
