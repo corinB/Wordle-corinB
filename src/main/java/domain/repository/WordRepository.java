@@ -1,10 +1,12 @@
 package domain.repository;
 
 import domain.model.vo.Word;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface WordRepository {
 
   Optional<Word> findByWord(Word word);
