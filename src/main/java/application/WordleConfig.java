@@ -1,5 +1,7 @@
 package application;
 
+import domain.model.CorrectSelector;
+import domain.model.RandomCorrectSelector;
 import domain.model.WordleGame;
 import domain.repository.WordRepository;
 import org.springframework.context.annotation.Bean;
@@ -30,11 +32,17 @@ public class WordleConfig {
   }
 
   @Bean
+  public CorrectSelector correctSelector(){
+    return new RandomCorrectSelector();
+  }
+
+  @Bean
   public WordleGame wordleGame(
     WordRepository wordRepository
   ) {
     return new WordleGame(
-      wordRepository.findAll()
+      wordRepository.findAll(),
+      correctSelector()
     );
   }
 }
