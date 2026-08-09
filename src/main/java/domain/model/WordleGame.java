@@ -13,8 +13,22 @@ public class WordleGame {
 
   public WordleGame(List<Word> words, CorrectSelector correctSelector) {
     this.correct = correctSelector.select(words);
-    this.start = LocalDateTime.now();
+    this.start = LocalDateTime.now().toLocalDate().atStartOfDay();
     this.end = start.plusDays(1);
+  }
+
+  private WordleGame(Word correct, LocalDateTime start, LocalDateTime end) {
+    this.correct = correct;
+    this.start = start;
+    this.end = end;
+  }
+
+  public static WordleGame restore(
+    Word correct,
+    LocalDateTime start,
+    LocalDateTime end
+  ) {
+    return new WordleGame(correct, start, end);
   }
 
   public Word getCorrect() {

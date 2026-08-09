@@ -15,7 +15,7 @@ public class WordEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "value", unique = true, nullable = false)
+  @Column(name = "\"value\"", unique = true, nullable = false)
   @Getter
   private String value;
 
