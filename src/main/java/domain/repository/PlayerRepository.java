@@ -1,6 +1,6 @@
 package domain.repository;
 import domain.model.Player;
-import domain.model.vo.Email;
+import domain.vo.Email;
 
 import java.util.Optional;
 

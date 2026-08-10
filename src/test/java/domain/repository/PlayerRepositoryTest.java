@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import domain.model.Player;
-import domain.model.vo.Email;
+import domain.vo.Email;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

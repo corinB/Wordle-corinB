@@ -1,6 +1,7 @@
 package domain.model;
 
-import domain.model.vo.Word;
+import domain.policy.CorrectSelector;
+import domain.vo.Word;
 
 import java.time.LocalDateTime;
 import java.util.List;

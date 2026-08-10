@@ -1,6 +1,7 @@
 package domain.model;
 
-import domain.model.vo.Word;
+import domain.policy.impl.RandomCorrectSelector;
+import domain.vo.Word;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 

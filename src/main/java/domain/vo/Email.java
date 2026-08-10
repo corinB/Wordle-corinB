@@ -1,4 +1,4 @@
-package domain.model.vo;
+package domain.vo;
 
 import java.util.Locale;
 import java.util.regex.Pattern;

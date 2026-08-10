@@ -1,6 +1,6 @@
 package infrastructure.persistence.repository.impl;
 
-import domain.model.vo.Word;
+import domain.vo.Word;
 import domain.repository.WordRepository;
 import infrastructure.persistence.entity.WordEntity;
 import infrastructure.persistence.repository.WordJPARepository;

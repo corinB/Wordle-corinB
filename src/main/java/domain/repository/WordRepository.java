@@ -1,6 +1,6 @@
 package domain.repository;
 
-import domain.model.vo.Word;
+import domain.vo.Word;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

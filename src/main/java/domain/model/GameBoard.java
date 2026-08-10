@@ -1,66 +1,145 @@
 package domain.model;
 
-import domain.model.vo.Word;
+import domain.vo.GameHistory;
+import domain.vo.Round;
+import domain.vo.TryCount;
+import domain.vo.Word;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static domain.exception.DomainErrorType.GAME_ALREADY_FINISHED;
+import static domain.exception.DomainErrorType.GAME_NOT_FINISHED;
 
-//게임 현황(진행 상황)을 나타내는 도메인
 public class GameBoard {
-
-  //최대 도전 기회
   public static final int MAX_CHANCE = 6;
 
-  //정답
-  private final Word correct;
-  //채점 기록
-  private final List<String> records;
-  //정답 맞췄는지 여부
-  private boolean correctFlag;
+  private final Player player;
+  private final WordleGame game;
+  private final List<Round> rounds;
+  private GameBoardStatus status;
 
-  public GameBoard(Word correct) {
-    this.correct = correct;
-    this.records = new ArrayList<>();
-    this.correctFlag = false;
+  public GameBoard(Player player, WordleGame game) {
+    this.player = Objects.requireNonNull(player);
+    this.game = Objects.requireNonNull(game);
+    this.rounds = new ArrayList<>();
+    this.status = GameBoardStatus.PLAYING;
   }
 
-  //응답 제출
+  private GameBoard(
+    Player player,
+    WordleGame game,
+    List<Round> rounds,
+    GameBoardStatus status
+  ) {
+    this.player = Objects.requireNonNull(player);
+    this.game = Objects.requireNonNull(game);
+    this.rounds = new ArrayList<>(Objects.requireNonNull(rounds));
+    this.status = Objects.requireNonNull(status);
+  }
+
+  public static GameBoard restore(
+    Player player,
+    WordleGame game,
+    List<Round> rounds,
+    GameBoardStatus status
+  ) {
+    return new GameBoard(player, game, rounds, status);
+  }
+
   public void submit(Word answer) {
     if (!canSubmit()) {
       throw GAME_ALREADY_FINISHED.createException();
     }
 
-    records.add(correct.compare(answer));
+    Word submittedAnswer = Objects.requireNonNull(answer);
+    rounds.add(new Round(rounds.size(), submittedAnswer, getCorrect()));
+    updateStatus(submittedAnswer);
+  }
 
-    if (correct.equals(answer)) {
-      correctFlag = true;
+  public void finishIfGameEnded(LocalDateTime currentTime) {
+    if (isFinished()) {
+      return;
+    }
+
+    if (!Objects.requireNonNull(currentTime).isBefore(game.getEnd())) {
+      status = GameBoardStatus.EXPIRED;
     }
   }
 
-  //종료 판단: 제출 가능한 상태인가?
-  public boolean canSubmit() {
-    return !correctFlag && records.size() < MAX_CHANCE;
+  public Player getPlayer() {
+    return player;
   }
 
-  //종료 판단: 정답을 맞추었는가?
-  public boolean isCorrect() {
-    return correctFlag;
+  public WordleGame getGame() {
+    return game;
   }
 
-  //정답 얻기(테스트용)
   public Word getCorrect() {
-    return correct;
+    return game.getCorrect();
   }
 
-  //소비한 기회 몇번인지
-  public int getSpentChance() {
-    return records.size();
+  public List<Round> getRounds() {
+    return List.copyOf(rounds);
   }
 
-  //지금까지의 채점 기록 얻기
   public List<String> getRecords() {
-    return List.copyOf(records);
+    return rounds.stream()
+      .map(Round::compare)
+      .toList();
+  }
+
+  public int getSpentChance() {
+    return rounds.size();
+  }
+
+  public boolean canSubmit() {
+    return status == GameBoardStatus.PLAYING;
+  }
+
+  public boolean isCorrect() {
+    return status == GameBoardStatus.WIN;
+  }
+
+  public boolean isFailed() {
+    return status == GameBoardStatus.LOSE;
+  }
+
+  public boolean isExpired() {
+    return status == GameBoardStatus.EXPIRED;
+  }
+
+  public boolean isFinished() {
+    return status != GameBoardStatus.PLAYING;
+  }
+
+  public GameBoardStatus getStatus() {
+    return status;
+  }
+
+  private void updateStatus(Word answer) {
+    if (getCorrect().equals(answer)) {
+      status = GameBoardStatus.WIN;
+      return;
+    }
+
+    if (rounds.size() >= MAX_CHANCE) {
+      status = GameBoardStatus.LOSE;
+    }
+  }
+
+  public GameHistory getHistory() {
+    if (!isFinished()) {
+      throw GAME_NOT_FINISHED.createException();
+    }
+
+    return new GameHistory(
+      game,
+      player,
+      new TryCount(rounds.size()),
+      status
+    );
   }
 }

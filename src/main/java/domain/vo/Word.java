@@ -1,4 +1,4 @@
-package domain.model.vo;
+package domain.vo;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;

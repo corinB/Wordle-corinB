@@ -1,7 +1,7 @@
-package application;
+package application.config;
 
-import domain.model.CorrectSelector;
-import domain.model.RandomCorrectSelector;
+import domain.policy.CorrectSelector;
+import domain.policy.impl.RandomCorrectSelector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

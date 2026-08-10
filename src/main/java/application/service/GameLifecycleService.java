@@ -1,6 +1,6 @@
 package application.service;
 
-import domain.model.CorrectSelector;
+import domain.policy.CorrectSelector;
 import domain.model.WordleGame;
 import domain.repository.WordRepository;
 import domain.repository.WordleGameRepository;

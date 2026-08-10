@@ -1,13 +1,14 @@
-package domain.model;
+package domain.policy.impl;
 
-import domain.model.vo.Word;
+import domain.policy.CorrectSelector;
+import domain.vo.Word;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class RandomCorrectSelector implements CorrectSelector{
+public class RandomCorrectSelector implements CorrectSelector {
 
   private final Random random;
   private Word correct;

@@ -1,7 +1,8 @@
 package domain.model;
 
 
-import domain.model.vo.Word;
+import domain.policy.CorrectSelector;
+import domain.vo.Word;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 
@@ -25,7 +26,7 @@ public class DictionaryTest {
     assertThat(word1.value()).isIn("apple", "white", "green");
   }
 
-  static class OnlyFirstSelector implements CorrectSelector{
+  static class OnlyFirstSelector implements CorrectSelector {
     @Override
     public Word select(List<Word> words) {
       return words.get(0);
