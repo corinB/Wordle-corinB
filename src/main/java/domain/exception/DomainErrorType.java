@@ -11,6 +11,14 @@ public enum DomainErrorType {
   GAME_ALREADY_FINISHED(
     "끝난 게임입니다.",
     GameAlreadyFinishedException::new
+  ),
+  GAME_NOT_FINISHED(
+    "아직 끝나지 않은 게임입니다.",
+    GameNotFinishedException::new
+  ),
+  INVALID_TRY_COUNT(
+    "시도 횟수가 올바르지 않습니다.",
+    InvalidTryCountException::new
   );
 
   private final String message;
