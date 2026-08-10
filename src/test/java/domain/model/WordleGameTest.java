@@ -1,5 +1,6 @@
 package domain.model;
-import domain.model.vo.Word;
+import domain.policy.CorrectSelector;
+import domain.vo.Word;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -18,7 +19,7 @@ public class WordleGameTest {
 
 }
 
-class FakeSelector implements CorrectSelector{
+class FakeSelector implements CorrectSelector {
   @Override
   public Word select(List<Word> words) {
     return words.getFirst();

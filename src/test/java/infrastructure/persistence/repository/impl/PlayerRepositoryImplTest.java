@@ -2,7 +2,7 @@ package infrastructure.persistence.repository.impl;
 
 import application.WordleApplication;
 import domain.model.Player;
-import domain.model.vo.Email;
+import domain.vo.Email;
 import domain.repository.PlayerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

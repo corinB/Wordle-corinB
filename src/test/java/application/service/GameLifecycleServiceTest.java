@@ -1,7 +1,7 @@
 package application.service;
 
 import domain.model.WordleGame;
-import domain.model.vo.Word;
+import domain.vo.Word;
 import domain.repository.WordRepository;
 import domain.repository.WordleGameRepository;
 import org.junit.jupiter.api.BeforeEach;

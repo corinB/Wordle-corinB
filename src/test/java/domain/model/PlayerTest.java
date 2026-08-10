@@ -4,9 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import domain.model.vo.Email;
-import domain.model.vo.EncodedPassword;
-import domain.model.vo.Nickname;
+import domain.policy.PasswordMatcher;
+import domain.vo.Email;
+import domain.vo.EncodedPassword;
+import domain.vo.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -2,7 +2,7 @@ package infrastructure.persistence.repository.impl;
 
 import application.WordleApplication;
 import domain.model.WordleGame;
-import domain.model.vo.Word;
+import domain.vo.Word;
 import domain.repository.WordleGameRepository;
 import infrastructure.persistence.entity.WordEntity;
 import org.junit.jupiter.api.DisplayName;
