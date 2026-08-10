@@ -1,9 +1,9 @@
 package infrastructure.persistence.entity;
 
 import domain.model.Player;
-import domain.model.vo.Email;
-import domain.model.vo.EncodedPassword;
-import domain.model.vo.Nickname;
+import domain.vo.Email;
+import domain.vo.EncodedPassword;
+import domain.vo.Nickname;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,13 +15,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-  name = "players",
-  uniqueConstraints = {
-    @UniqueConstraint(name = "uk_players_email", columnNames = "email"),
-    @UniqueConstraint(name = "uk_players_nickname", columnNames = "nickname")
-  }
-)
+@Table(name = "players")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlayerEntity {
 
@@ -29,10 +23,10 @@ public class PlayerEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "nickname", nullable = false)
+  @Column(name = "nickname", nullable = false, unique = true)
   private String nickname;
 
-  @Column(name = "email", nullable = false)
+  @Column(name = "email", nullable = false, unique = true)
   private String email;
 
   @Column(name = "encoded_password", nullable = false)

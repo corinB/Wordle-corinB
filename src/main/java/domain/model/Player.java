@@ -1,12 +1,9 @@
 package domain.model;
 
-import domain.model.vo.Email;
-import domain.model.vo.EncodedPassword;
-import domain.model.vo.Nickname;
-
-import java.util.Locale;
-import java.util.Objects;
-import java.util.regex.Pattern;
+import domain.policy.PasswordMatcher;
+import domain.vo.Email;
+import domain.vo.EncodedPassword;
+import domain.vo.Nickname;
 
 public final class Player {
 

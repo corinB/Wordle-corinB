@@ -1,6 +1,6 @@
 package infrastructure.persistence.entity;
 
-import domain.model.vo.Word;
+import domain.vo.Word;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

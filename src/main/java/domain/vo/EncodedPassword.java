@@ -1,6 +1,6 @@
-package domain.model.vo;
+package domain.vo;
 
-import domain.model.PasswordMatcher;
+import domain.policy.PasswordMatcher;
 import java.util.Objects;
 
 public record EncodedPassword(String value) {

@@ -1,6 +1,6 @@
-package domain.model;
+package domain.policy;
 
-import domain.model.vo.Word;
+import domain.vo.Word;
 
 import java.util.List;
 

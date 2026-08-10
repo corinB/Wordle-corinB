@@ -1,7 +1,7 @@
 package infrastructure.persistence.repository.impl;
 
 import domain.model.Player;
-import domain.model.vo.Email;
+import domain.vo.Email;
 import domain.repository.PlayerRepository;
 import infrastructure.persistence.entity.PlayerEntity;
 import infrastructure.persistence.repository.PlayerJPARepository;

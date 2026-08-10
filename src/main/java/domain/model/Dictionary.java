@@ -1,6 +1,8 @@
 package domain.model;
 
-import domain.model.vo.Word;
+import domain.policy.CorrectSelector;
+import domain.policy.impl.RandomCorrectSelector;
+import domain.vo.Word;
 
 import java.util.Arrays;
 import java.util.List;
