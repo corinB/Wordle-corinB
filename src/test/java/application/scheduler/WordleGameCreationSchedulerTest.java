@@ -1,6 +1,7 @@
 package application.scheduler;
 
 import application.service.GameLifecycleService;
+import application.service.PlayingGameService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,11 +15,17 @@ class WordleGameCreationSchedulerTest {
   void startNewGameDelegatesToService() {
     GameLifecycleService gameLifecycleService =
       mock(GameLifecycleService.class);
+    PlayingGameService playingGameService =
+      mock(PlayingGameService.class);
     WordleGameCreationScheduler scheduler =
-      new WordleGameCreationScheduler(gameLifecycleService);
+      new WordleGameCreationScheduler(
+        gameLifecycleService,
+        playingGameService
+      );
 
     scheduler.startNewGame();
 
+    verify(playingGameService).expireAllEndedGames();
     verify(gameLifecycleService).startNewGame();
   }
 }
