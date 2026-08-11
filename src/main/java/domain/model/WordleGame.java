@@ -24,6 +24,7 @@ public class WordleGame {
     this.end = end;
   }
 
+  //entitiy to domain용
   public static WordleGame restore(
     Word correct,
     LocalDateTime start,

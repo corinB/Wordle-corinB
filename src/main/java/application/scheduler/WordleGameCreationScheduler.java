@@ -16,8 +16,10 @@ public class WordleGameCreationScheduler {
   @Scheduled(cron = "${wordle.game.creation-cron}")
   public void startNewGame() {
 
+    // 게임 만료 시키기
     playingGameService.expireAllEndedGames();
 
+    // 새 게임 생성
     gameLifecycleService.startNewGame();
   }
 }

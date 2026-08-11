@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
   uniqueConstraints = {
     @UniqueConstraint(
       name = "uk_game_board_rounds_board_index",
-      columnNames = {"game_board_id", "round_index"}
+      columnNames = {"game_board_id", "round_index"} //게임보드 내에서 리운드의 인덱스는 유일하다
     )
   }
 )

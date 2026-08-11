@@ -13,6 +13,7 @@ import java.util.Objects;
 import static domain.exception.DomainErrorType.GAME_ALREADY_FINISHED;
 import static domain.exception.DomainErrorType.GAME_NOT_FINISHED;
 
+// 게임 진행 상태
 public class GameBoard {
   public static final int MAX_CHANCE = 6;
 
@@ -40,6 +41,7 @@ public class GameBoard {
     this.status = Objects.requireNonNull(status);
   }
 
+  //entity to Domain 용
   public static GameBoard restore(
     Player player,
     WordleGame game,
@@ -49,16 +51,21 @@ public class GameBoard {
     return new GameBoard(player, game, rounds, status);
   }
 
+  //답안 제출
   public void submit(Word answer) {
+    // 끝난 게임에 대한 보드인지 검증
     if (!canSubmit()) {
       throw GAME_ALREADY_FINISHED.createException();
     }
 
     Word submittedAnswer = Objects.requireNonNull(answer);
+    //새 라운드 추가
     rounds.add(new Round(rounds.size(), submittedAnswer, getCorrect()));
+    //게임 상태 업데이트
     updateStatus(submittedAnswer);
   }
 
+  //게임 종료(만료) 처리
   public void finishIfGameEnded(LocalDateTime currentTime) {
     if (isFinished()) {
       return;
@@ -130,6 +137,7 @@ public class GameBoard {
     }
   }
 
+  //게임 기록 얻기
   public GameHistory getHistory() {
     if (!isFinished()) {
       throw GAME_NOT_FINISHED.createException();

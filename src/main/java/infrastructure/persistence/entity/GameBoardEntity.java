@@ -29,7 +29,7 @@ import java.util.List;
   uniqueConstraints = {
     @UniqueConstraint(
       name = "uk_game_boards_player_game",
-      columnNames = {"player_id", "wordle_game_id"}
+      columnNames = {"player_id", "wordle_game_id"} // 각플레이어는 게임당 하나의 보드만 가질 수 있음
     )
   }
 )
@@ -56,7 +56,7 @@ public class GameBoardEntity {
     cascade = CascadeType.ALL,
     orphanRemoval = true
   )
-  @OrderBy("roundIndex ASC")
+  @OrderBy("roundIndex ASC") //라운드 순서로 정렬
   private List<GameBoardRoundEntity> rounds = new ArrayList<>();
 
   public static GameBoardEntity create(
