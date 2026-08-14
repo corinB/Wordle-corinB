@@ -9,12 +9,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "wordle_games")
@@ -35,6 +38,10 @@ public class WordleGameEntity {
 
   @Column(name = "end_at", nullable = false, unique = true)
   private LocalDateTime endAt;
+
+  @OneToMany
+  @JoinColumn(name = "wordle_game_id", referencedColumnName = "id")
+  private List<GameBoardEntity> gameBoards = new ArrayList<>();
 
   public static WordleGameEntity create(
     WordleGame wordleGame,

@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface PlayerJPARepository extends JpaRepository<PlayerEntity, Long> {
 
   Optional<PlayerEntity> findByEmail(String email);
+
+  Optional<PlayerEntity> findByNickname(String nickname);
 }

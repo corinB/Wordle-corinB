@@ -5,6 +5,7 @@ import domain.model.GameBoardStatus;
 import domain.model.Player;
 import domain.model.WordleGame;
 import domain.repository.GameBoardRepository;
+import domain.vo.Nickname;
 import infrastructure.persistence.entity.GameBoardEntity;
 import infrastructure.persistence.entity.PlayerEntity;
 import infrastructure.persistence.entity.WordleGameEntity;
@@ -30,11 +31,14 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   @Override
   @Transactional
   public GameBoard save(GameBoard gameBoard) {
-    PlayerEntity playerEntity = findPlayerEntity(gameBoard.getPlayer());
-    WordleGameEntity gameEntity = findGameEntity(gameBoard.getGame());
+    PlayerEntity playerEntity = findPlayerEntity(gameBoard.getNickname());
+    WordleGameEntity gameEntity = findGameEntity(gameBoard.getDeadLine());
 
     GameBoardEntity entity = gameBoardJPARepository
-      .findByPlayerAndGame(playerEntity, gameEntity)
+      .findByPlayerIdAndWordleGameId(
+        playerEntity.getId(),
+        gameEntity.getId()
+      )
       .map(foundEntity -> {
         foundEntity.update(gameBoard);
         return foundEntity;
@@ -43,7 +47,8 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
         GameBoardEntity.create(playerEntity, gameEntity, gameBoard)
       );
 
-    return gameBoardJPARepository.save(entity).toDomain();
+    return gameBoardJPARepository.save(entity)
+      .toDomain(playerEntity, gameEntity);
   }
 
   @Override
@@ -56,8 +61,11 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     WordleGameEntity gameEntity = findGameEntity(game);
 
     return gameBoardJPARepository
-      .findByPlayerAndGame(playerEntity, gameEntity)
-      .map(GameBoardEntity::toDomain);
+      .findByPlayerIdAndWordleGameId(
+        playerEntity.getId(),
+        gameEntity.getId()
+      )
+      .map(entity -> entity.toDomain(playerEntity, gameEntity));
   }
 
   @Override
@@ -65,13 +73,23 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   public List<GameBoard> findAllPlayingBoardsEndedBefore(
     LocalDateTime currentTime
   ) {
+    List<Long> endedGameIds = wordleGameJPARepository
+      .findAllByEndAtLessThanEqual(currentTime)
+      .stream()
+      .map(WordleGameEntity::getId)
+      .toList();
+
+    if (endedGameIds.isEmpty()) {
+      return List.of();
+    }
+
     return gameBoardJPARepository
-      .findAllByStatusAndGame_EndAtLessThanEqual(
+      .findAllByStatusAndWordleGameIdIn(
         GameBoardStatus.PLAYING,
-        currentTime
+        endedGameIds
       )
       .stream()
-      .map(GameBoardEntity::toDomain)
+      .map(this::toDomain)
       .toList();
   }
 
@@ -83,11 +101,50 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
       );
   }
 
+  private PlayerEntity findPlayerEntity(Nickname nickname) {
+    return playerJPARepository
+      .findByNickname(nickname.value())
+      .orElseThrow(() ->
+        new IllegalArgumentException("Player does not exist.")
+      );
+  }
+
   private WordleGameEntity findGameEntity(WordleGame game) {
     return wordleGameJPARepository
       .findByStartAt(game.getStart())
       .orElseThrow(() ->
         new IllegalArgumentException("Wordle game does not exist.")
       );
+  }
+
+  private WordleGameEntity findGameEntity(LocalDateTime endAt) {
+    return wordleGameJPARepository
+      .findByEndAt(endAt)
+      .orElseThrow(() ->
+        new IllegalArgumentException("Wordle game does not exist.")
+      );
+  }
+
+  private PlayerEntity findPlayerEntity(Long playerId) {
+    return playerJPARepository
+      .findById(playerId)
+      .orElseThrow(() ->
+        new IllegalArgumentException("Player does not exist.")
+      );
+  }
+
+  private WordleGameEntity findGameEntity(Long wordleGameId) {
+    return wordleGameJPARepository
+      .findById(wordleGameId)
+      .orElseThrow(() ->
+        new IllegalArgumentException("Wordle game does not exist.")
+      );
+  }
+
+  private GameBoard toDomain(GameBoardEntity entity) {
+    return entity.toDomain(
+      findPlayerEntity(entity.getPlayerId()),
+      findGameEntity(entity.getWordleGameId())
+    );
   }
 }
