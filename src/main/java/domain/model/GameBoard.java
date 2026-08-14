@@ -28,7 +28,7 @@ public class GameBoard {
   ) {
     this.deadLine = deadLine;
     this.status = status;
-    this.rounds = rounds;
+    this.rounds = new ArrayList<>(rounds);
     this.correct = correct;
     this.nickname = nickname;
   }
