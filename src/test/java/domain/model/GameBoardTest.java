@@ -26,12 +26,12 @@ class GameBoardTest {
     GameBoard gameBoard = new GameBoard(player, game);
 
     assertAll(
-      () -> assertThat(gameBoard.getPlayer())
-        .isSameAs(player),
-      () -> assertThat(gameBoard.getGame())
-        .isSameAs(game),
+      () -> assertThat(gameBoard.getNickname())
+        .isEqualTo(player.getNickname()),
       () -> assertThat(gameBoard.getCorrect())
-        .isEqualTo(correct)
+        .isEqualTo(correct),
+      () -> assertThat(gameBoard.getDeadLine())
+        .isEqualTo(game.getEnd())
     );
   }
 

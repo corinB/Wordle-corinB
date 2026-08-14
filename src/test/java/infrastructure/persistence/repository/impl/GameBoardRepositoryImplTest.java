@@ -11,6 +11,8 @@ import infrastructure.persistence.entity.PlayerEntity;
 import infrastructure.persistence.entity.WordEntity;
 import infrastructure.persistence.entity.WordleGameEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
+import infrastructure.persistence.repository.PlayerJPARepository;
+import infrastructure.persistence.repository.WordleGameJPARepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,12 @@ class GameBoardRepositoryImplTest {
 
   @Autowired
   private GameBoardJPARepository gameBoardJPARepository;
+
+  @Autowired
+  private PlayerJPARepository playerJPARepository;
+
+  @Autowired
+  private WordleGameJPARepository wordleGameJPARepository;
 
   @Autowired
   private TestEntityManager entityManager;
@@ -69,11 +77,20 @@ class GameBoardRepositoryImplTest {
 
     GameBoard savedGameBoard = foundGameBoard.get();
 
+    PlayerEntity savedPlayer = playerJPARepository
+      .findByNickname(player.getNickname().value())
+      .orElseThrow();
+    WordleGameEntity savedGame = wordleGameJPARepository
+      .findByEndAt(game.getEnd())
+      .orElseThrow();
+
     assertAll(
-      () -> assertThat(savedGameBoard.getPlayer().getEmail())
-        .isEqualTo(player.getEmail()),
-      () -> assertThat(savedGameBoard.getGame().getStart())
-        .isEqualTo(game.getStart()),
+      () -> assertThat(savedGameBoard.getNickname())
+        .isEqualTo(player.getNickname()),
+      () -> assertThat(savedGameBoard.getDeadLine())
+        .isEqualTo(game.getEnd()),
+      () -> assertThat(savedGameBoard.getCorrect())
+        .isEqualTo(correct),
       () -> assertThat(savedGameBoard.getStatus())
         .isEqualTo(GameBoardStatus.WIN),
       () -> assertThat(savedGameBoard.getRounds())
@@ -83,7 +100,11 @@ class GameBoardRepositoryImplTest {
         .containsExactly(
           correct.compare(firstAnswer),
           correct.compare(correct)
-        )
+        ),
+      () -> assertThat(savedPlayer.getGameBoards())
+        .hasSize(1),
+      () -> assertThat(savedGame.getGameBoards())
+        .hasSize(1)
     );
   }
 
@@ -147,10 +168,10 @@ class GameBoardRepositoryImplTest {
     assertAll(
       () -> assertThat(endedBoards)
         .hasSize(1),
-      () -> assertThat(endedBoards.getFirst().getPlayer().getEmail())
-        .isEqualTo(endedPlayer.getEmail()),
-      () -> assertThat(endedBoards.getFirst().getGame().getStart())
-        .isEqualTo(endedGame.getStart())
+      () -> assertThat(endedBoards.getFirst().getNickname())
+        .isEqualTo(endedPlayer.getNickname()),
+      () -> assertThat(endedBoards.getFirst().getDeadLine())
+        .isEqualTo(endedGame.getEnd())
     );
   }
 
