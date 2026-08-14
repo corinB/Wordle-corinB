@@ -19,7 +19,13 @@ public class GameBoard {
   private final List<Round> rounds;
   private GameBoardStatus status;
 
-  public GameBoard(LocalDateTime deadLine,GameBoardStatus status, List<Round> rounds, Word correct,  Nickname nickname) {
+  private GameBoard(
+    LocalDateTime deadLine,
+    GameBoardStatus status,
+    List<Round> rounds,
+    Word correct,
+    Nickname nickname
+  ) {
     this.deadLine = deadLine;
     this.status = status;
     this.rounds = rounds;
@@ -53,12 +59,19 @@ public class GameBoard {
   }
 
   public static GameBoard restore(
-    Player player,
-    WordleGame game,
+    LocalDateTime deadLine,
+    GameBoardStatus status,
     List<Round> rounds,
-    GameBoardStatus status
+    Word correct,
+    Nickname nickname
   ) {
-    return new GameBoard(player, game, rounds, status);
+    return new GameBoard(
+      deadLine,
+      status,
+      rounds,
+      correct,
+      nickname
+    );
   }
 
   public void submit(Word answer) {

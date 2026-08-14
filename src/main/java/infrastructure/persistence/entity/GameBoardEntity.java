@@ -3,6 +3,7 @@ package infrastructure.persistence.entity;
 import domain.model.GameBoard;
 import domain.model.GameBoardStatus;
 import domain.vo.Round;
+import domain.vo.Word;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,6 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,13 +42,8 @@ public class GameBoardEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "player_id", nullable = false)
-  private PlayerEntity player;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "wordle_game_id", nullable = false)
-  private WordleGameEntity game;
+  private Long playerId;
+  private Long gameId;
 
   @Enumerated(EnumType.STRING)
   private GameBoardStatus status;
@@ -65,8 +62,8 @@ public class GameBoardEntity {
     GameBoard gameBoard
   ) {
     GameBoardEntity entity = new GameBoardEntity();
-    entity.player = player;
-    entity.game = game;
+    entity.playerId = player.getId();
+    entity.gameId = game.getId();
     entity.update(gameBoard);
     return entity;
   }
@@ -84,18 +81,5 @@ public class GameBoardEntity {
 
   private void appendNewRound(Round newRound) {
     rounds.add(GameBoardRoundEntity.create(this, newRound));
-  }
-
-  public GameBoard toDomain() {
-    List<Round> domainRounds = rounds.stream()
-      .map(GameBoardRoundEntity::toDomain)
-      .toList();
-
-    return GameBoard.restore(
-      player.toDomain(),
-      game.toDomain(),
-      domainRounds,
-      status
-    );
   }
 }
