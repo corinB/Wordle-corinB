@@ -12,6 +12,8 @@ public interface GameBoardRepository {
 
   GameBoard save(GameBoard gameBoard);
 
+  void saveAll(List<GameBoard> gameBoards);
+
   Optional<GameBoard> findByPlayerAndGame(
     Player player,
     WordleGame game

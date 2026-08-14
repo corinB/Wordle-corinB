@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,11 +54,13 @@ public class PlayingGameService {
   public void expireAllEndedGames() {
     LocalDateTime currentTime = LocalDateTime.now();
 
-    gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
-      .forEach(gameBoard -> {
-        gameBoard.finishIfGameEnded(currentTime);
-        gameBoardRepository.save(gameBoard);
-      });
+    List<GameBoard> expiredGameBoards =
+      gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
+        .stream()
+        .peek(gameBoard -> gameBoard.finishIfGameEnded(currentTime))
+        .toList();
+
+    gameBoardRepository.saveAll(expiredGameBoards);
   }
 
   @Transactional(readOnly = true)

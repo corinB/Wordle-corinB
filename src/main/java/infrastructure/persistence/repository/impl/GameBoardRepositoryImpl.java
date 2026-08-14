@@ -12,7 +12,11 @@ import infrastructure.persistence.entity.WordleGameEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
 import infrastructure.persistence.repository.PlayerJPARepository;
 import infrastructure.persistence.repository.WordleGameJPARepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,8 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   private final GameBoardJPARepository gameBoardJPARepository;
   private final PlayerJPARepository playerJPARepository;
   private final WordleGameJPARepository wordleGameJPARepository;
+  private final NamedParameterJdbcTemplate jdbcTemplate;
+  private final EntityManager entityManager;
 
   @Override
   @Transactional
@@ -49,6 +55,28 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
 
     return gameBoardJPARepository.save(entity)
       .toDomain(playerEntity, gameEntity);
+  }
+
+  @Override
+  @Transactional
+  public void saveAll(List<GameBoard> gameBoards) {
+    if (gameBoards.isEmpty()) {
+      return;
+    }
+
+    entityManager.flush();
+    jdbcTemplate.batchUpdate(
+      """
+      UPDATE game_boards
+      SET status = :status
+      WHERE player_id = :playerId
+        AND wordle_game_id = :wordleGameId
+      """,
+      gameBoards.stream()
+        .map(this::toStatusUpdateParameter)
+        .toArray(SqlParameterSource[]::new)
+    );
+    entityManager.clear();
   }
 
   @Override
@@ -146,5 +174,15 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
       findPlayerEntity(entity.getPlayerId()),
       findGameEntity(entity.getWordleGameId())
     );
+  }
+
+  private SqlParameterSource toStatusUpdateParameter(GameBoard gameBoard) {
+    PlayerEntity playerEntity = findPlayerEntity(gameBoard.getNickname());
+    WordleGameEntity gameEntity = findGameEntity(gameBoard.getDeadLine());
+
+    return new MapSqlParameterSource()
+      .addValue("status", gameBoard.getStatus().name())
+      .addValue("playerId", playerEntity.getId())
+      .addValue("wordleGameId", gameEntity.getId());
   }
 }
