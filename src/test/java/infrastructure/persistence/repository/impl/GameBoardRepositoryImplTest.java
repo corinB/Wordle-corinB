@@ -201,6 +201,63 @@ class GameBoardRepositoryImplTest {
     );
   }
 
+  @Test
+  @DisplayName("여러 GameBoard의 상태를 한 번에 저장한다")
+  void saveAllUpdatesGameBoardStatuses() {
+    Player firstPlayer = persistPlayer("firstB", "first@example.com");
+    Player secondPlayer = persistPlayer("secondB", "second@example.com");
+    Player activePlayer = persistPlayer("activeB", "active@example.com");
+    LocalDateTime currentTime = LocalDateTime.of(2026, 8, 10, 12, 0);
+    WordleGame endedGame = persistGame(
+      new Word("apple"),
+      currentTime.minusDays(2)
+    );
+    WordleGame activeGame = persistGame(
+      new Word("cocoa"),
+      currentTime.plusDays(1)
+    );
+
+    gameBoardRepository.save(new GameBoard(firstPlayer, endedGame));
+    gameBoardRepository.save(new GameBoard(secondPlayer, endedGame));
+    gameBoardRepository.save(new GameBoard(activePlayer, activeGame));
+    entityManager.flush();
+    entityManager.clear();
+
+    List<GameBoard> expiredGameBoards =
+      gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
+        .stream()
+        .map(gameBoard -> {
+          gameBoard.finishIfGameEnded(currentTime);
+          return gameBoard;
+        })
+        .toList();
+
+    gameBoardRepository.saveAll(expiredGameBoards);
+    entityManager.flush();
+    entityManager.clear();
+
+    GameBoard firstExpiredGameBoard = gameBoardRepository
+      .findByPlayerAndGame(firstPlayer, endedGame)
+      .orElseThrow();
+    GameBoard secondExpiredGameBoard = gameBoardRepository
+      .findByPlayerAndGame(secondPlayer, endedGame)
+      .orElseThrow();
+    GameBoard activeGameBoard = gameBoardRepository
+      .findByPlayerAndGame(activePlayer, activeGame)
+      .orElseThrow();
+
+    assertAll(
+      () -> assertThat(expiredGameBoards)
+        .hasSize(2),
+      () -> assertThat(firstExpiredGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.EXPIRED),
+      () -> assertThat(secondExpiredGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.EXPIRED),
+      () -> assertThat(activeGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.PLAYING)
+    );
+  }
+
   private Player persistPlayer(String nickname, String email) {
     Player player = Player.create(
       nickname,
