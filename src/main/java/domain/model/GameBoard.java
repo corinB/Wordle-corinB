@@ -1,9 +1,6 @@
 package domain.model;
 
-import domain.vo.GameHistory;
-import domain.vo.Round;
-import domain.vo.TryCount;
-import domain.vo.Word;
+import domain.vo.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,16 +13,34 @@ import static domain.exception.DomainErrorType.GAME_NOT_FINISHED;
 public class GameBoard {
   public static final int MAX_CHANCE = 6;
 
-  private final Player player;
-  private final WordleGame game;
+  private final Nickname nickname;
+  private final Word correct;
+  private final LocalDateTime deadLine;
   private final List<Round> rounds;
   private GameBoardStatus status;
 
+  private GameBoard(
+    LocalDateTime deadLine,
+    GameBoardStatus status,
+    List<Round> rounds,
+    Word correct,
+    Nickname nickname
+  ) {
+    this.deadLine = deadLine;
+    this.status = status;
+    this.rounds = new ArrayList<>(rounds);
+    this.correct = correct;
+    this.nickname = nickname;
+  }
+
   public GameBoard(Player player, WordleGame game) {
-    this.player = Objects.requireNonNull(player);
-    this.game = Objects.requireNonNull(game);
-    this.rounds = new ArrayList<>();
-    this.status = GameBoardStatus.PLAYING;
+    this(
+      game.getEnd(),
+      GameBoardStatus.PLAYING,
+      new ArrayList<>(),
+      Objects.requireNonNull(game, "게임은 필수입니다.").getCorrect(),
+      Objects.requireNonNull(player, "플레이어는 필수입니다.").getNickname()
+    );
   }
 
   private GameBoard(
@@ -34,19 +49,29 @@ public class GameBoard {
     List<Round> rounds,
     GameBoardStatus status
   ) {
-    this.player = Objects.requireNonNull(player);
-    this.game = Objects.requireNonNull(game);
-    this.rounds = new ArrayList<>(Objects.requireNonNull(rounds));
-    this.status = Objects.requireNonNull(status);
+    this(
+      game.getEnd(),
+      status,
+      rounds,
+      Objects.requireNonNull(game, "게임은 필수입니다.").getCorrect(),
+      Objects.requireNonNull(player, "플레이어는 필수입니다.").getNickname()
+    );
   }
 
   public static GameBoard restore(
-    Player player,
-    WordleGame game,
+    LocalDateTime deadLine,
+    GameBoardStatus status,
     List<Round> rounds,
-    GameBoardStatus status
+    Word correct,
+    Nickname nickname
   ) {
-    return new GameBoard(player, game, rounds, status);
+    return new GameBoard(
+      deadLine,
+      status,
+      rounds,
+      correct,
+      nickname
+    );
   }
 
   public void submit(Word answer) {
@@ -64,21 +89,21 @@ public class GameBoard {
       return;
     }
 
-    if (!Objects.requireNonNull(currentTime).isBefore(game.getEnd())) {
+    if (!Objects.requireNonNull(currentTime).isBefore(deadLine)) {
       status = GameBoardStatus.EXPIRED;
     }
   }
 
-  public Player getPlayer() {
-    return player;
-  }
-
-  public WordleGame getGame() {
-    return game;
+  public Nickname getNickname() {
+    return nickname;
   }
 
   public Word getCorrect() {
-    return game.getCorrect();
+    return correct;
+  }
+
+  public LocalDateTime getDeadLine() {
+    return deadLine;
   }
 
   public List<Round> getRounds() {
@@ -136,8 +161,8 @@ public class GameBoard {
     }
 
     return new GameHistory(
-      game,
-      player,
+      correct,
+      nickname,
       new TryCount(rounds.size()),
       status
     );

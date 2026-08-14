@@ -52,10 +52,12 @@ class PlayingGameServiceTest {
     GameBoard gameBoard = playingGameService.joinGame(player);
 
     assertAll(
-      () -> assertThat(gameBoard.getPlayer().getEmail())
-        .isEqualTo(player.getEmail()),
-      () -> assertThat(gameBoard.getGame().getStart())
-        .isEqualTo(todayGame.getStart()),
+      () -> assertThat(gameBoard.getNickname())
+        .isEqualTo(player.getNickname()),
+      () -> assertThat(gameBoard.getCorrect())
+        .isEqualTo(correct),
+      () -> assertThat(gameBoard.getDeadLine())
+        .isEqualTo(todayGame.getEnd()),
       () -> assertThat(gameBoard.getStatus())
         .isEqualTo(GameBoardStatus.PLAYING)
     );
@@ -122,9 +124,9 @@ class PlayingGameServiceTest {
     GameHistory history = playingGameService.getHistory(gameBoard);
 
     assertAll(
-      () -> assertThat(history.player().getEmail())
-        .isEqualTo(player.getEmail()),
-      () -> assertThat(history.wordleGame().getCorrect())
+      () -> assertThat(history.player())
+        .isEqualTo(player.getNickname()),
+      () -> assertThat(history.correct())
         .isEqualTo(correct),
       () -> assertThat(history.tryCount().value())
         .isEqualTo(1),
