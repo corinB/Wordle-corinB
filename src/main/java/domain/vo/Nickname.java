@@ -2,6 +2,10 @@ package domain.vo;
 
 import java.util.regex.Pattern;
 
+import static domain.exception.DomainErrorType.INVALID_NICKNAME_FORMAT;
+import static domain.exception.DomainErrorType.INVALID_NICKNAME_LENGTH;
+import static domain.exception.DomainErrorType.NICKNAME_REQUIRED;
+
 public record Nickname(String value) {
 
   private static final int MIN_LENGTH = 2;
@@ -12,24 +16,18 @@ public record Nickname(String value) {
 
   public Nickname {
     if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException(
-        "닉네임은 필수입니다."
-      );
+      throw NICKNAME_REQUIRED.createException();
     }
 
     value = value.trim();
 
     if (value.length() < MIN_LENGTH
       || value.length() > MAX_LENGTH) {
-      throw new IllegalArgumentException(
-        "닉네임은 2자 이상 10자 이하여야 합니다."
-      );
+      throw INVALID_NICKNAME_LENGTH.createException();
     }
 
     if (!PATTERN.matcher(value).matches()) {
-      throw new IllegalArgumentException(
-        "닉네임은 영문, 숫자, !, ?, _, -, *, /만 사용할 수 있습니다."
-      );
+      throw INVALID_NICKNAME_FORMAT.createException();
     }
   }
 }

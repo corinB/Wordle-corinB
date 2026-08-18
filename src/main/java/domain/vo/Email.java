@@ -3,6 +3,9 @@ package domain.vo;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import static domain.exception.DomainErrorType.EMAIL_REQUIRED;
+import static domain.exception.DomainErrorType.INVALID_EMAIL_FORMAT;
+
 public record Email(String value) {
 
   private static final Pattern PATTERN =
@@ -12,9 +15,7 @@ public record Email(String value) {
 
   public Email {
     if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException(
-        "이메일은 필수입니다."
-      );
+      throw EMAIL_REQUIRED.createException();
     }
 
     value = value
@@ -22,9 +23,7 @@ public record Email(String value) {
       .toLowerCase(Locale.ROOT);
 
     if (!PATTERN.matcher(value).matches()) {
-      throw new IllegalArgumentException(
-        "올바른 이메일 형식이 아닙니다."
-      );
+      throw INVALID_EMAIL_FORMAT.createException();
     }
   }
 }
