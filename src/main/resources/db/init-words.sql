@@ -48,3 +48,12 @@ VALUES
   ('zamia'),
   ('tapas')
 ON CONFLICT ("value") DO NOTHING;
+
+INSERT INTO wordle_games (correct_word_id, start_at, end_at)
+SELECT
+  id,
+  CURRENT_DATE::timestamp,
+  (CURRENT_DATE + INTERVAL '1 day')::timestamp
+FROM words
+WHERE "value" = 'apple'
+ON CONFLICT DO NOTHING;
