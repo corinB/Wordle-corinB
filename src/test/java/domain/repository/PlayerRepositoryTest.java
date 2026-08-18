@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import domain.model.Player;
 import domain.vo.Email;
+import domain.vo.Nickname;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,21 +51,48 @@ class PlayerRepositoryTest {
       .isEmpty();
   }
 
+  @Test
+  @DisplayName("플레이어를 닉네임으로 조회한다")
+  void findByNickname() {
+    Player player = Player.create(
+      "corinB",
+      "corin@example.com",
+      "encodedPassword"
+    );
+
+    playerRepository.save(player);
+
+    Optional<Player> foundPlayer =
+      playerRepository.findByNickname(new Nickname("corinB"));
+
+    assertThat(foundPlayer)
+      .isPresent()
+      .containsSame(player);
+  }
+
   private static class FakePlayerRepository
     implements PlayerRepository {
 
     private final Map<String, Player> playersByEmail =
       new HashMap<>();
+    private final Map<String, Player> playersByNickname =
+      new HashMap<>();
 
     @Override
     public Player save(Player player) {
       playersByEmail.put(player.getEmail().value(), player);
+      playersByNickname.put(player.getNickname().value(), player);
       return player;
     }
 
     @Override
     public Optional<Player> findByEmail(Email email) {
       return Optional.ofNullable(playersByEmail.get(email.value()));
+    }
+
+    @Override
+    public Optional<Player> findByNickname(Nickname nickname) {
+      return Optional.ofNullable(playersByNickname.get(nickname.value()));
     }
   }
 }
