@@ -1,14 +1,12 @@
 package presentation.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class SubmitAnswerRequest {
 
   private String answer;
 
-  public String getAnswer() {
-    return answer;
-  }
-
-  public void setAnswer(String answer) {
-    this.answer = answer;
-  }
 }
