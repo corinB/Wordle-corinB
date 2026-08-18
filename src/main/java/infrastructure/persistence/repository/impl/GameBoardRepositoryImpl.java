@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -80,7 +81,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public Optional<GameBoard> findByPlayerAndGame(
     Player player,
     WordleGame game
@@ -97,7 +98,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public List<GameBoard> findAllPlayingBoardsEndedBefore(
     LocalDateTime currentTime
   ) {

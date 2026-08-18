@@ -8,6 +8,7 @@ import infrastructure.persistence.repository.WordJPARepository;
 import infrastructure.persistence.repository.WordleGameJPARepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class WordleGameRepositoryImpl implements WordleGameRepository {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public Optional<WordleGame> findByStartAt(LocalDateTime startAt) {
     return wordleGameJPARepository.findByStartAt(startAt)
       .map(WordleGameEntity::toDomain);
