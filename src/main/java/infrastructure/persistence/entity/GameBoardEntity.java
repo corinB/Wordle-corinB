@@ -2,17 +2,16 @@ package infrastructure.persistence.entity;
 
 import domain.model.GameBoard;
 import domain.model.GameBoardStatus;
+import domain.vo.Nickname;
 import domain.vo.Round;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -20,6 +19,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,15 +40,14 @@ public class GameBoardEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "player_id", nullable = false)
-  private PlayerEntity player;
+  @Column(name = "player_id", nullable = false)
+  private Long playerId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "wordle_game_id", nullable = false)
-  private WordleGameEntity game;
+  @Column(name = "wordle_game_id", nullable = false)
+  private Long wordleGameId;
 
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private GameBoardStatus status;
 
   @OneToMany(
@@ -65,8 +64,8 @@ public class GameBoardEntity {
     GameBoard gameBoard
   ) {
     GameBoardEntity entity = new GameBoardEntity();
-    entity.player = player;
-    entity.game = game;
+    entity.playerId = player.getId();
+    entity.wordleGameId = game.getId();
     entity.update(gameBoard);
     return entity;
   }
@@ -77,25 +76,39 @@ public class GameBoardEntity {
   }
 
   private void appendNewRound(List<Round> domainRounds) {
-    if (rounds.size() < domainRounds.size()) {
-      appendNewRound(domainRounds.getLast());
+    if (rounds.size() >= domainRounds.size()) {
+      return;
     }
+
+    domainRounds.stream()
+      .skip(rounds.size())
+      .forEach(this::appendNewRound);
   }
 
   private void appendNewRound(Round newRound) {
     rounds.add(GameBoardRoundEntity.create(this, newRound));
   }
 
-  public GameBoard toDomain() {
-    List<Round> domainRounds = rounds.stream()
-      .map(GameBoardRoundEntity::toDomain)
-      .toList();
+  public Long getPlayerId() {
+    return playerId;
+  }
 
+  public Long getWordleGameId() {
+    return wordleGameId;
+  }
+
+  public GameBoard toDomain(
+    PlayerEntity player,
+    WordleGameEntity game
+  ) {
     return GameBoard.restore(
-      player.toDomain(),
-      game.toDomain(),
-      domainRounds,
-      status
+      game.getEndAt(),
+      status,
+      rounds.stream()
+        .map(GameBoardRoundEntity::toDomain)
+        .toList(),
+      game.getCorrect().toDomain(),
+      new Nickname(player.getNickname())
     );
   }
 }

@@ -11,6 +11,8 @@ import infrastructure.persistence.entity.PlayerEntity;
 import infrastructure.persistence.entity.WordEntity;
 import infrastructure.persistence.entity.WordleGameEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
+import infrastructure.persistence.repository.PlayerJPARepository;
+import infrastructure.persistence.repository.WordleGameJPARepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,12 @@ class GameBoardRepositoryImplTest {
 
   @Autowired
   private GameBoardJPARepository gameBoardJPARepository;
+
+  @Autowired
+  private PlayerJPARepository playerJPARepository;
+
+  @Autowired
+  private WordleGameJPARepository wordleGameJPARepository;
 
   @Autowired
   private TestEntityManager entityManager;
@@ -69,11 +77,20 @@ class GameBoardRepositoryImplTest {
 
     GameBoard savedGameBoard = foundGameBoard.get();
 
+    PlayerEntity savedPlayer = playerJPARepository
+      .findByNickname(player.getNickname().value())
+      .orElseThrow();
+    WordleGameEntity savedGame = wordleGameJPARepository
+      .findByEndAt(game.getEnd())
+      .orElseThrow();
+
     assertAll(
-      () -> assertThat(savedGameBoard.getPlayer().getEmail())
-        .isEqualTo(player.getEmail()),
-      () -> assertThat(savedGameBoard.getGame().getStart())
-        .isEqualTo(game.getStart()),
+      () -> assertThat(savedGameBoard.getNickname())
+        .isEqualTo(player.getNickname()),
+      () -> assertThat(savedGameBoard.getDeadLine())
+        .isEqualTo(game.getEnd()),
+      () -> assertThat(savedGameBoard.getCorrect())
+        .isEqualTo(correct),
       () -> assertThat(savedGameBoard.getStatus())
         .isEqualTo(GameBoardStatus.WIN),
       () -> assertThat(savedGameBoard.getRounds())
@@ -83,7 +100,11 @@ class GameBoardRepositoryImplTest {
         .containsExactly(
           correct.compare(firstAnswer),
           correct.compare(correct)
-        )
+        ),
+      () -> assertThat(savedPlayer.getGameBoards())
+        .hasSize(1),
+      () -> assertThat(savedGame.getGameBoards())
+        .hasSize(1)
     );
   }
 
@@ -147,10 +168,10 @@ class GameBoardRepositoryImplTest {
     assertAll(
       () -> assertThat(endedBoards)
         .hasSize(1),
-      () -> assertThat(endedBoards.getFirst().getPlayer().getEmail())
-        .isEqualTo(endedPlayer.getEmail()),
-      () -> assertThat(endedBoards.getFirst().getGame().getStart())
-        .isEqualTo(endedGame.getStart())
+      () -> assertThat(endedBoards.getFirst().getNickname())
+        .isEqualTo(endedPlayer.getNickname()),
+      () -> assertThat(endedBoards.getFirst().getDeadLine())
+        .isEqualTo(endedGame.getEnd())
     );
   }
 
@@ -177,6 +198,63 @@ class GameBoardRepositoryImplTest {
         .isEqualTo(GameBoardStatus.EXPIRED),
       () -> assertThat(savedGameBoard.isExpired())
         .isTrue()
+    );
+  }
+
+  @Test
+  @DisplayName("여러 GameBoard의 상태를 한 번에 저장한다")
+  void saveAllUpdatesGameBoardStatuses() {
+    Player firstPlayer = persistPlayer("firstB", "first@example.com");
+    Player secondPlayer = persistPlayer("secondB", "second@example.com");
+    Player activePlayer = persistPlayer("activeB", "active@example.com");
+    LocalDateTime currentTime = LocalDateTime.of(2026, 8, 10, 12, 0);
+    WordleGame endedGame = persistGame(
+      new Word("apple"),
+      currentTime.minusDays(2)
+    );
+    WordleGame activeGame = persistGame(
+      new Word("cocoa"),
+      currentTime.plusDays(1)
+    );
+
+    gameBoardRepository.save(new GameBoard(firstPlayer, endedGame));
+    gameBoardRepository.save(new GameBoard(secondPlayer, endedGame));
+    gameBoardRepository.save(new GameBoard(activePlayer, activeGame));
+    entityManager.flush();
+    entityManager.clear();
+
+    List<GameBoard> expiredGameBoards =
+      gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
+        .stream()
+        .map(gameBoard -> {
+          gameBoard.finishIfGameEnded(currentTime);
+          return gameBoard;
+        })
+        .toList();
+
+    gameBoardRepository.saveAll(expiredGameBoards);
+    entityManager.flush();
+    entityManager.clear();
+
+    GameBoard firstExpiredGameBoard = gameBoardRepository
+      .findByPlayerAndGame(firstPlayer, endedGame)
+      .orElseThrow();
+    GameBoard secondExpiredGameBoard = gameBoardRepository
+      .findByPlayerAndGame(secondPlayer, endedGame)
+      .orElseThrow();
+    GameBoard activeGameBoard = gameBoardRepository
+      .findByPlayerAndGame(activePlayer, activeGame)
+      .orElseThrow();
+
+    assertAll(
+      () -> assertThat(expiredGameBoards)
+        .hasSize(2),
+      () -> assertThat(firstExpiredGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.EXPIRED),
+      () -> assertThat(secondExpiredGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.EXPIRED),
+      () -> assertThat(activeGameBoard.getStatus())
+        .isEqualTo(GameBoardStatus.PLAYING)
     );
   }
 

@@ -9,9 +9,9 @@ import domain.vo.GameHistory;
 import domain.vo.Word;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +20,6 @@ public class PlayingGameService {
   private final GameBoardRepository gameBoardRepository;
   private final WordleGameRepository wordleGameRepository;
 
-  @Transactional
   public GameBoard joinGame(Player player) {
     WordleGame todayGame = findTodayGame();
 
@@ -31,7 +30,6 @@ public class PlayingGameService {
       );
   }
 
-  @Transactional
   public GameBoard submitAnswer(Player player, Word word) {
     LocalDateTime currentTime = LocalDateTime.now();
     WordleGame todayGame = findTodayGame(currentTime);
@@ -49,18 +47,18 @@ public class PlayingGameService {
     return gameBoardRepository.save(gameBoard);
   }
 
-  @Transactional
   public void expireAllEndedGames() {
     LocalDateTime currentTime = LocalDateTime.now();
 
-    gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
-      .forEach(gameBoard -> {
-        gameBoard.finishIfGameEnded(currentTime);
-        gameBoardRepository.save(gameBoard);
-      });
+    List<GameBoard> expiredGameBoards =
+      gameBoardRepository.findAllPlayingBoardsEndedBefore(currentTime)
+        .stream()
+        .peek(gameBoard -> gameBoard.finishIfGameEnded(currentTime))
+        .toList();
+
+    gameBoardRepository.saveAll(expiredGameBoards);
   }
 
-  @Transactional(readOnly = true)
   public GameHistory getHistory(GameBoard gameBoard) {
     return gameBoard.getHistory();
   }
