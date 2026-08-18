@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static infrastructure.exception.InfrastructureErrorType.CORRECT_WORD_ENTITY_NOT_FOUND;
+
 @Repository
 @RequiredArgsConstructor
 public class WordleGameRepositoryImpl implements WordleGameRepository {
@@ -41,7 +43,7 @@ public class WordleGameRepositoryImpl implements WordleGameRepository {
     return wordJPARepository
       .findByValue(wordleGame.getCorrect().value())
       .orElseThrow(() ->
-        new IllegalArgumentException("Correct word does not exist.")
+        CORRECT_WORD_ENTITY_NOT_FOUND.createException()
       );
   }
 }

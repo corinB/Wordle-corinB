@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static application.exception.ApplicationErrorType.GAME_BOARD_NOT_FOUND;
+import static application.exception.ApplicationErrorType.TODAY_WORDLE_GAME_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class PlayingGameService {
@@ -36,7 +39,7 @@ public class PlayingGameService {
     GameBoard gameBoard = gameBoardRepository
       .findByPlayerAndGame(player, todayGame)
       .orElseThrow(() ->
-        new IllegalArgumentException("Game board does not exist.")
+        GAME_BOARD_NOT_FOUND.createException()
       );
 
     gameBoard.finishIfGameEnded(currentTime);
@@ -72,7 +75,7 @@ public class PlayingGameService {
 
     return wordleGameRepository.findByStartAt(todayStart)
       .orElseThrow(() ->
-        new IllegalArgumentException("Today's wordle game does not exist.")
+        TODAY_WORDLE_GAME_NOT_FOUND.createException()
       );
   }
 }

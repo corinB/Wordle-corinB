@@ -16,9 +16,57 @@ public enum DomainErrorType {
     "아직 끝나지 않은 게임입니다.",
     GameNotFinishedException::new
   ),
+  GAME_REQUIRED(
+    "게임은 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  PLAYER_REQUIRED(
+    "플레이어는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  ANSWER_REQUIRED(
+    "답안은 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  CURRENT_TIME_REQUIRED(
+    "현재 시간은 필수입니다.",
+    IllegalArgumentException::new
+  ),
   INVALID_TRY_COUNT(
     "시도 횟수가 올바르지 않습니다.",
     InvalidTryCountException::new
+  ),
+  NICKNAME_REQUIRED(
+    "닉네임은 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  INVALID_NICKNAME_LENGTH(
+    "닉네임은 2자 이상 10자 이하이어야 합니다.",
+    IllegalArgumentException::new
+  ),
+  INVALID_NICKNAME_FORMAT(
+    "닉네임은 영문, 숫자, !, ?, _, -, *, /만 사용할 수 있습니다.",
+    IllegalArgumentException::new
+  ),
+  EMAIL_REQUIRED(
+    "이메일은 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  INVALID_EMAIL_FORMAT(
+    "올바른 이메일 형식이 아닙니다.",
+    IllegalArgumentException::new
+  ),
+  PASSWORD_REQUIRED(
+    "비밀번호는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  ENCODED_PASSWORD_REQUIRED(
+    "암호화된 비밀번호는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  PASSWORD_MATCHER_REQUIRED(
+    "비밀번호 비교기가 필요합니다.",
+    IllegalArgumentException::new
   );
 
   private final String message;
@@ -29,7 +77,6 @@ public enum DomainErrorType {
     this.exceptionFactory = exceptionFactory;
   }
 
-  // 에러 메시지와 예외 생성을 enum에서 함께 관리한다.
   public RuntimeException createException() {
     return exceptionFactory.apply(message);
   }

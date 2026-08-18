@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가입하기</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+  <h1>가입하기</h1>
+  <p class="error" th:if="${errorMessage}" th:text="${errorMessage}">오류</p>
+
+  <form th:action="@{/players/register}" th:object="${registerRequest}" method="post">
+    <label>
+      닉네임
+      <input type="text" th:field="*{nickname}" required>
+    </label>
+    <label>
+      이메일
+      <input type="email" th:field="*{email}" required>
+    </label>
+    <label>
+      비밀번호
+      <input type="password" th:field="*{password}" required>
+    </label>
+    <button type="submit">가입</button>
+  </form>
+
+  <a th:href="@{/players/login}">이미 계정이 있어요</a>
+</main>
+</body>
+</html>

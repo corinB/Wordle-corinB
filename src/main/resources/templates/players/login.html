@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+  <h1>로그인</h1>
+  <p class="error" th:if="${errorMessage}" th:text="${errorMessage}">오류</p>
+
+  <form th:action="@{/players/login}" th:object="${loginRequest}" method="post">
+    <label>
+      이메일
+      <input type="email" th:field="*{email}" required>
+    </label>
+    <label>
+      비밀번호
+      <input type="password" th:field="*{password}" required>
+    </label>
+    <button type="submit">로그인</button>
+  </form>
+
+  <a th:href="@{/players/register}">새 계정 만들기</a>
+</main>
+</body>
+</html>

@@ -6,6 +6,8 @@ import domain.vo.EncodedPassword;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import static domain.exception.DomainErrorType.PASSWORD_REQUIRED;
+
 @Component
 public class BCryptPasswordEncryptor
   implements PasswordEncryptor, PasswordMatcher {
@@ -16,7 +18,7 @@ public class BCryptPasswordEncryptor
   @Override
   public EncodedPassword encrypt(String rawPassword) {
     if (rawPassword == null || rawPassword.isBlank()) {
-      throw new IllegalArgumentException("Password is required.");
+      throw PASSWORD_REQUIRED.createException();
     }
 
     return new EncodedPassword(passwordEncoder.encode(rawPassword));

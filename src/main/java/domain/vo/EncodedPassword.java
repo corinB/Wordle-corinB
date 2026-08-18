@@ -1,15 +1,15 @@
 package domain.vo;
 
 import domain.policy.PasswordMatcher;
-import java.util.Objects;
+
+import static domain.exception.DomainErrorType.ENCODED_PASSWORD_REQUIRED;
+import static domain.exception.DomainErrorType.PASSWORD_MATCHER_REQUIRED;
 
 public record EncodedPassword(String value) {
 
   public EncodedPassword {
     if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException(
-        "인코딩된 비밀번호는 필수입니다."
-      );
+      throw ENCODED_PASSWORD_REQUIRED.createException();
     }
   }
 
@@ -17,10 +17,9 @@ public record EncodedPassword(String value) {
     String rawPassword,
     PasswordMatcher passwordMatcher
   ) {
-    Objects.requireNonNull(
-      passwordMatcher,
-      "비밀번호 비교기가 필요합니다."
-    );
+    if (passwordMatcher == null) {
+      throw PASSWORD_MATCHER_REQUIRED.createException();
+    }
 
     if (rawPassword == null || rawPassword.isBlank()) {
       return false;
