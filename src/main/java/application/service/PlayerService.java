@@ -10,6 +10,11 @@ import domain.vo.Nickname;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static application.exception.ApplicationErrorType.DUPLICATED_EMAIL;
+import static application.exception.ApplicationErrorType.DUPLICATED_NICKNAME;
+import static application.exception.ApplicationErrorType.PASSWORD_DOES_NOT_MATCH;
+import static application.exception.ApplicationErrorType.PLAYER_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class PlayerService {
@@ -45,7 +50,7 @@ public class PlayerService {
     Player player = findByEmail(email);
 
     if (!player.matchesPassword(rawPassword, passwordMatcher)) {
-      throw new IllegalArgumentException("Password does not match.");
+      throw PASSWORD_DOES_NOT_MATCH.createException();
     }
 
     return player;
@@ -54,21 +59,21 @@ public class PlayerService {
   public Player findByEmail(String email) {
     return playerRepository.findByEmail(new Email(email))
       .orElseThrow(() ->
-        new IllegalArgumentException("Player does not exist.")
+        PLAYER_NOT_FOUND.createException()
       );
   }
 
   private void validateDuplicateNickname(Nickname nickname) {
     playerRepository.findByNickname(nickname)
       .ifPresent(player -> {
-        throw new IllegalArgumentException("Nickname already exists.");
+        throw DUPLICATED_NICKNAME.createException();
       });
   }
 
   private void validateDuplicateEmail(Email email) {
     playerRepository.findByEmail(email)
       .ifPresent(player -> {
-        throw new IllegalArgumentException("Email already exists.");
+        throw DUPLICATED_EMAIL.createException();
       });
   }
 }
