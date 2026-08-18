@@ -25,6 +25,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static infrastructure.exception.InfrastructureErrorType.PLAYER_ENTITY_NOT_FOUND;
+import static infrastructure.exception.InfrastructureErrorType.WORDLE_GAME_ENTITY_NOT_FOUND;
+
 @Repository
 @RequiredArgsConstructor
 public class GameBoardRepositoryImpl implements GameBoardRepository {
@@ -126,7 +129,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return playerJPARepository
       .findByEmail(player.getEmail().value())
       .orElseThrow(() ->
-        new IllegalArgumentException("Player does not exist.")
+        PLAYER_ENTITY_NOT_FOUND.createException()
       );
   }
 
@@ -134,7 +137,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return playerJPARepository
       .findByNickname(nickname.value())
       .orElseThrow(() ->
-        new IllegalArgumentException("Player does not exist.")
+        PLAYER_ENTITY_NOT_FOUND.createException()
       );
   }
 
@@ -142,7 +145,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return wordleGameJPARepository
       .findByStartAt(game.getStart())
       .orElseThrow(() ->
-        new IllegalArgumentException("Wordle game does not exist.")
+        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
       );
   }
 
@@ -150,7 +153,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return wordleGameJPARepository
       .findByEndAt(endAt)
       .orElseThrow(() ->
-        new IllegalArgumentException("Wordle game does not exist.")
+        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
       );
   }
 
@@ -158,7 +161,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return playerJPARepository
       .findById(playerId)
       .orElseThrow(() ->
-        new IllegalArgumentException("Player does not exist.")
+        PLAYER_ENTITY_NOT_FOUND.createException()
       );
   }
 
@@ -166,7 +169,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
     return wordleGameJPARepository
       .findById(wordleGameId)
       .orElseThrow(() ->
-        new IllegalArgumentException("Wordle game does not exist.")
+        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
       );
   }
 
