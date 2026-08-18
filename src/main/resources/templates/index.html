@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+  <h1>Wordle</h1>
+  <p class="muted">오늘의 단어를 맞혀보세요.</p>
+  <div class="actions">
+    <a class="button" th:href="@{/players/register}">가입하기</a>
+    <a class="button secondary" th:href="@{/players/login}">로그인</a>
+    <a th:href="@{/games/today}">오늘 게임</a>
+  </div>
+</main>
+</body>
+</html>

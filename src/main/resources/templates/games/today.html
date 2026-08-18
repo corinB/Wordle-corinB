@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘 게임</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+  <h1>오늘 게임</h1>
+  <p>
+    <strong th:text="${player.nickname.value()}">player</strong>
+    <span class="muted">님</span>
+  </p>
+
+  <p class="error" th:if="${errorMessage}" th:text="${errorMessage}">오류</p>
+
+  <section th:if="${gameBoard == null}">
+    <p class="muted">아직 오늘 게임에 참여하지 않았습니다.</p>
+    <form th:action="@{/games/today/join}" method="post">
+      <button type="submit">게임 시작</button>
+    </form>
+  </section>
+
+  <section th:if="${gameBoard != null}">
+    <p>
+      상태:
+      <strong th:text="${gameBoard.status}">PLAYING</strong>
+      <span class="muted">
+        (<span th:text="${gameBoard.spentChance}">0</span> / 6)
+      </span>
+    </p>
+
+    <ol class="record-list" th:if="${!gameBoard.records.isEmpty()}">
+      <li th:each="record : ${gameBoard.records}" th:text="${record}">-----</li>
+    </ol>
+
+    <form
+      th:if="${gameBoard.canSubmit()}"
+      th:action="@{/games/today/answers}"
+      th:object="${answerRequest}"
+      method="post"
+    >
+      <label>
+        답안
+        <input
+          type="text"
+          th:field="*{answer}"
+          minlength="5"
+          maxlength="5"
+          required
+          autocomplete="off"
+        >
+      </label>
+      <button type="submit">제출</button>
+    </form>
+
+    <a
+      class="button secondary"
+      th:if="${gameBoard.finished}"
+      th:href="@{/games/today/history}"
+    >
+      결과 보기
+    </a>
+  </section>
+
+  <form th:action="@{/players/logout}" method="post">
+    <button class="secondary" type="submit">로그아웃</button>
+  </form>
+</main>
+</body>
+</html>

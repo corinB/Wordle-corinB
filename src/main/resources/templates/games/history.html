@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게임 결과</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+  <h1>게임 결과</h1>
+
+  <p>
+    플레이어:
+    <strong th:text="${history.player().value()}">player</strong>
+  </p>
+  <p>
+    결과:
+    <strong th:text="${history.status()}">WIN</strong>
+  </p>
+  <p>
+    시도:
+    <strong th:text="${history.tryCount().value()}">0</strong>
+  </p>
+  <p>
+    정답:
+    <strong th:text="${history.correct().value()}">word</strong>
+  </p>
+
+  <div class="actions">
+    <a class="button secondary" th:href="@{/games/today}">오늘 게임</a>
+    <form th:action="@{/players/logout}" method="post">
+      <button class="secondary" type="submit">로그아웃</button>
+    </form>
+  </div>
+</main>
+</body>
+</html>
