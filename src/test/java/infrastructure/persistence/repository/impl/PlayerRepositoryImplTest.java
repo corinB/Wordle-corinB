@@ -4,6 +4,7 @@ import application.WordleApplication;
 import domain.model.Player;
 import domain.vo.Email;
 import domain.repository.PlayerRepository;
+import domain.vo.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,37 @@ class PlayerRepositoryImplTest {
 
     Optional<Player> foundPlayer =
       playerRepository.findByEmail(new Email("corin@example.com"));
+
+    assertThat(foundPlayer)
+      .isPresent();
+
+    Player savedPlayer = foundPlayer.get();
+
+    assertAll(
+      () -> assertThat(savedPlayer.getNickname().value())
+        .isEqualTo("corinB"),
+      () -> assertThat(savedPlayer.getEmail().value())
+        .isEqualTo("corin@example.com"),
+      () -> assertThat(savedPlayer.getEncodedPassword().value())
+        .isEqualTo("encodedPassword")
+    );
+  }
+
+  @Test
+  @DisplayName("Player를 저장하고 Nickname VO로 조회한다")
+  void saveAndFindByNickname() {
+    Player player = Player.create(
+      "corinB",
+      "corin@example.com",
+      "encodedPassword"
+    );
+
+    playerRepository.save(player);
+    entityManager.flush();
+    entityManager.clear();
+
+    Optional<Player> foundPlayer =
+      playerRepository.findByNickname(new Nickname("corinB"));
 
     assertThat(foundPlayer)
       .isPresent();
