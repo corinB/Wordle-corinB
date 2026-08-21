@@ -1,5 +1,7 @@
 package application.exception;
 
+import lombok.Getter;
+
 public enum ApplicationErrorType {
 
   PASSWORD_DOES_NOT_MATCH("비밀번호가 일치하지 않습니다."),
@@ -11,6 +13,7 @@ public enum ApplicationErrorType {
   WORDLE_GAME_NOT_FOUND("워들 게임을 찾을 수 없습니다."),
   WORD_NOT_FOUND("단어를 찾을 수 없습니다.");
 
+  @Getter
   private final String message;
 
   ApplicationErrorType(String message) {
@@ -19,9 +22,5 @@ public enum ApplicationErrorType {
 
   public IllegalArgumentException createException() {
     return new IllegalArgumentException(message);
-  }
-
-  public String getMessage() {
-    return message;
   }
 }

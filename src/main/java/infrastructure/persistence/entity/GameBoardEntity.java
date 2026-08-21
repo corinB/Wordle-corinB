@@ -17,6 +17,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -37,12 +38,15 @@ public class GameBoardEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Getter
   private Long id;
 
   @Column(name = "player_id", nullable = false)
+  @Getter
   private Long playerId;
 
   @Column(name = "wordle_game_id", nullable = false)
+  @Getter
   private Long wordleGameId;
 
   @Enumerated(EnumType.STRING)
@@ -68,18 +72,6 @@ public class GameBoardEntity {
       .skip(rounds.size())
       .map(GameBoardRoundEntity::create)
       .forEach(rounds::add);
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public Long getPlayerId() {
-    return playerId;
-  }
-
-  public Long getWordleGameId() {
-    return wordleGameId;
   }
 
   public GameBoard toDomain() {

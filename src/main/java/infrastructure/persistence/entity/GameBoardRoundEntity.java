@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -35,6 +36,7 @@ public class GameBoardRoundEntity {
     insertable = false,
     updatable = false
   )
+  @Getter
   private Long gameBoardId;
 
   @Column(name = "round_index", nullable = false)
@@ -62,7 +64,4 @@ public class GameBoardRoundEntity {
     );
   }
 
-  public Long getGameBoardId() {
-    return gameBoardId;
-  }
 }

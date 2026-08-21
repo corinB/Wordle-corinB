@@ -53,9 +53,7 @@ public class PlayingGameService {
     WordleGame todayGame = findTodayGame(currentTime);
     GameBoard gameBoard = gameBoardRepository
       .findByPlayerIdAndWordleGameId(player.getId(), todayGame.getId())
-      .orElseThrow(() ->
-        GAME_BOARD_NOT_FOUND.createException()
-      );
+      .orElseThrow(GAME_BOARD_NOT_FOUND::createException);
 
     Word correct = findWord(todayGame.getCorrectWordId());
     gameBoard.finishIfGameEnded(currentTime, todayGame.getEnd());
@@ -96,10 +94,10 @@ public class PlayingGameService {
   @Transactional(readOnly = true)
   public GameHistory getHistory(GameBoard gameBoard) {
     Player player = playerRepository.findById(gameBoard.getPlayerId())
-      .orElseThrow(() -> PLAYER_NOT_FOUND.createException());
+      .orElseThrow(PLAYER_NOT_FOUND::createException);
     WordleGame game = wordleGameRepository
       .findById(gameBoard.getWordleGameId())
-      .orElseThrow(() -> WORDLE_GAME_NOT_FOUND.createException());
+      .orElseThrow(WORDLE_GAME_NOT_FOUND::createException);
 
     return gameBoard.getHistory(
       player.getNickname(),
@@ -115,13 +113,11 @@ public class PlayingGameService {
     LocalDateTime todayStart = currentTime.toLocalDate().atStartOfDay();
 
     return wordleGameRepository.findByStartAt(todayStart)
-      .orElseThrow(() ->
-        TODAY_WORDLE_GAME_NOT_FOUND.createException()
-      );
+      .orElseThrow(TODAY_WORDLE_GAME_NOT_FOUND::createException);
   }
 
   private Word findWord(Long wordId) {
     return wordRepository.findById(wordId)
-      .orElseThrow(() -> WORD_NOT_FOUND.createException());
+      .orElseThrow(WORD_NOT_FOUND::createException);
   }
 }

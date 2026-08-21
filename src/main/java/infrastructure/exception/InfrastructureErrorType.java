@@ -1,5 +1,7 @@
 package infrastructure.exception;
 
+import lombok.Getter;
+
 import java.util.function.Function;
 
 public enum InfrastructureErrorType {
@@ -10,6 +12,7 @@ public enum InfrastructureErrorType {
   WORDLE_GAME_ENTITY_NOT_FOUND("워들 게임 엔티티를 찾을 수 없습니다.", IllegalArgumentException::new),
   CORRECT_WORD_ENTITY_NOT_FOUND("정답 단어 엔티티를 찾을 수 없습니다.", IllegalArgumentException::new);
 
+  @Getter
   private final String message;
   private final Function<String, RuntimeException> exceptionFactory;
 
@@ -28,9 +31,5 @@ public enum InfrastructureErrorType {
 
   public WordFileException createException(Throwable cause) {
     return new WordFileException(message, cause);
-  }
-
-  public String getMessage() {
-    return message;
   }
 }

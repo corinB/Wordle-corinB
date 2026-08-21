@@ -1,5 +1,7 @@
 package presentation;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,14 +20,11 @@ public class GameScript {
     END_POSITIVE("%d/%d"),
     END_NEGATIVE("게임이 종료되었습니다.");
 
+    @Getter
     private final String message;
 
     Script(String message) {
       this.message = message;
-    }
-
-    public String getMessage() {
-      return message;
     }
   }
 }
