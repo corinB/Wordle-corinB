@@ -6,12 +6,19 @@ import domain.model.GameBoardStatus;
 import domain.model.WordleGame;
 import domain.repository.GameBoardRepository;
 import domain.vo.Word;
+import infrastructure.persistence.entity.GameBoardEntity;
+import infrastructure.persistence.entity.GameBoardRoundEntity;
 import infrastructure.persistence.entity.PlayerEntity;
 import infrastructure.persistence.entity.WordEntity;
 import infrastructure.persistence.entity.WordleGameEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
 import infrastructure.persistence.repository.PlayerJPARepository;
 import infrastructure.persistence.repository.WordleGameJPARepository;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,6 +163,28 @@ class GameBoardRepositoryImplTest {
         PlayerJPARepository.class,
         WordleGameJPARepository.class
       );
+  }
+
+  @Test
+  @DisplayName("GameBoardEntity가 라운드 목록의 생명주기를 소유한다")
+  void gameBoardEntityOwnsRoundAggregate() throws NoSuchFieldException {
+    Field rounds = GameBoardEntity.class.getDeclaredField("rounds");
+    OneToMany oneToMany = rounds.getAnnotation(OneToMany.class);
+    JoinColumn joinColumn = rounds.getAnnotation(JoinColumn.class);
+    OrderBy orderBy = rounds.getAnnotation(OrderBy.class);
+    Field gameBoardId = GameBoardRoundEntity.class
+      .getDeclaredField("gameBoardId");
+    Column gameBoardIdColumn = gameBoardId.getAnnotation(Column.class);
+
+    assertAll(
+      () -> assertThat(oneToMany).isNotNull(),
+      () -> assertThat(oneToMany.cascade()).contains(CascadeType.ALL),
+      () -> assertThat(oneToMany.orphanRemoval()).isTrue(),
+      () -> assertThat(joinColumn.name()).isEqualTo("game_board_id"),
+      () -> assertThat(orderBy.value()).isEqualTo("roundIndex ASC"),
+      () -> assertThat(gameBoardIdColumn.insertable()).isFalse(),
+      () -> assertThat(gameBoardIdColumn.updatable()).isFalse()
+    );
   }
 
   private Long persistPlayer(String nickname, String email) {
