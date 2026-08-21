@@ -2,9 +2,7 @@ package infrastructure.persistence.entity;
 
 import domain.model.GameBoard;
 import domain.model.GameBoardStatus;
-import domain.vo.Nickname;
 import domain.vo.Round;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,15 +10,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -50,43 +45,20 @@ public class GameBoardEntity {
   @Column(nullable = false)
   private GameBoardStatus status;
 
-  @OneToMany(
-    mappedBy = "gameBoard",
-    cascade = CascadeType.ALL,
-    orphanRemoval = true
-  )
-  @OrderBy("roundIndex ASC")
-  private List<GameBoardRoundEntity> rounds = new ArrayList<>();
-
-  public static GameBoardEntity create(
-    PlayerEntity player,
-    WordleGameEntity game,
-    GameBoard gameBoard
-  ) {
+  public static GameBoardEntity create(GameBoard gameBoard) {
     GameBoardEntity entity = new GameBoardEntity();
-    entity.playerId = player.getId();
-    entity.wordleGameId = game.getId();
+    entity.playerId = gameBoard.getPlayerId();
+    entity.wordleGameId = gameBoard.getWordleGameId();
     entity.update(gameBoard);
     return entity;
   }
 
   public void update(GameBoard gameBoard) {
     this.status = gameBoard.getStatus();
-    appendNewRound(gameBoard.getRounds());
   }
 
-  private void appendNewRound(List<Round> domainRounds) {
-    if (rounds.size() >= domainRounds.size()) {
-      return;
-    }
-
-    domainRounds.stream()
-      .skip(rounds.size())
-      .forEach(this::appendNewRound);
-  }
-
-  private void appendNewRound(Round newRound) {
-    rounds.add(GameBoardRoundEntity.create(this, newRound));
+  public Long getId() {
+    return id;
   }
 
   public Long getPlayerId() {
@@ -97,18 +69,12 @@ public class GameBoardEntity {
     return wordleGameId;
   }
 
-  public GameBoard toDomain(
-    PlayerEntity player,
-    WordleGameEntity game
-  ) {
+  public GameBoard toDomain(List<Round> rounds) {
     return GameBoard.restore(
-      game.getEndAt(),
+      playerId,
+      wordleGameId,
       status,
-      rounds.stream()
-        .map(GameBoardRoundEntity::toDomain)
-        .toList(),
-      game.getCorrect().toDomain(),
-      new Nickname(player.getNickname())
+      rounds
     );
   }
 }

@@ -2,16 +2,11 @@ package infrastructure.persistence.repository.impl;
 
 import domain.model.GameBoard;
 import domain.model.GameBoardStatus;
-import domain.model.Player;
-import domain.model.WordleGame;
 import domain.repository.GameBoardRepository;
-import domain.vo.Nickname;
+import domain.vo.Round;
 import infrastructure.persistence.entity.GameBoardEntity;
-import infrastructure.persistence.entity.PlayerEntity;
-import infrastructure.persistence.entity.WordleGameEntity;
+import infrastructure.persistence.entity.GameBoardRoundEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
-import infrastructure.persistence.repository.PlayerJPARepository;
-import infrastructure.persistence.repository.WordleGameJPARepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -21,44 +16,38 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import static infrastructure.exception.InfrastructureErrorType.PLAYER_ENTITY_NOT_FOUND;
-import static infrastructure.exception.InfrastructureErrorType.WORDLE_GAME_ENTITY_NOT_FOUND;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class GameBoardRepositoryImpl implements GameBoardRepository {
 
   private final GameBoardJPARepository gameBoardJPARepository;
-  private final PlayerJPARepository playerJPARepository;
-  private final WordleGameJPARepository wordleGameJPARepository;
   private final NamedParameterJdbcTemplate jdbcTemplate;
   private final EntityManager entityManager;
 
   @Override
   @Transactional
   public GameBoard save(GameBoard gameBoard) {
-    PlayerEntity playerEntity = findPlayerEntity(gameBoard.getNickname());
-    WordleGameEntity gameEntity = findGameEntity(gameBoard.getDeadLine());
-
     GameBoardEntity entity = gameBoardJPARepository
       .findByPlayerIdAndWordleGameId(
-        playerEntity.getId(),
-        gameEntity.getId()
+        gameBoard.getPlayerId(),
+        gameBoard.getWordleGameId()
       )
       .map(foundEntity -> {
         foundEntity.update(gameBoard);
         return foundEntity;
       })
-      .orElseGet(() ->
-        GameBoardEntity.create(playerEntity, gameEntity, gameBoard)
-      );
+      .orElseGet(() -> GameBoardEntity.create(gameBoard));
 
-    return gameBoardJPARepository.save(entity)
-      .toDomain(playerEntity, gameEntity);
+    GameBoardEntity savedEntity = gameBoardJPARepository.saveAndFlush(entity);
+    appendNewRounds(savedEntity.getId(), gameBoard.getRounds());
+
+    return savedEntity.toDomain(gameBoard.getRounds());
   }
 
   @Override
@@ -85,108 +74,110 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
 
   @Override
   @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-  public Optional<GameBoard> findByPlayerAndGame(
-    Player player,
-    WordleGame game
+  public Optional<GameBoard> findByPlayerIdAndWordleGameId(
+    Long playerId,
+    Long wordleGameId
   ) {
-    PlayerEntity playerEntity = findPlayerEntity(player);
-    WordleGameEntity gameEntity = findGameEntity(game);
-
     return gameBoardJPARepository
-      .findByPlayerIdAndWordleGameId(
-        playerEntity.getId(),
-        gameEntity.getId()
-      )
-      .map(entity -> entity.toDomain(playerEntity, gameEntity));
+      .findByPlayerIdAndWordleGameId(playerId, wordleGameId)
+      .map(entity -> entity.toDomain(findRoundsByGameBoardId(entity.getId())));
   }
 
   @Override
   @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-  public List<GameBoard> findAllPlayingBoardsEndedBefore(
-    LocalDateTime currentTime
+  public List<GameBoard> findAllPlayingByWordleGameIds(
+    List<Long> wordleGameIds
   ) {
-    List<Long> endedGameIds = wordleGameJPARepository
-      .findAllByEndAtLessThanEqual(currentTime)
-      .stream()
-      .map(WordleGameEntity::getId)
-      .toList();
-
-    if (endedGameIds.isEmpty()) {
+    if (wordleGameIds.isEmpty()) {
       return List.of();
     }
 
-    return gameBoardJPARepository
+    List<GameBoardEntity> entities = gameBoardJPARepository
       .findAllByStatusAndWordleGameIdIn(
         GameBoardStatus.PLAYING,
-        endedGameIds
-      )
-      .stream()
-      .map(this::toDomain)
+        wordleGameIds
+      );
+
+    Map<Long, List<Round>> roundsByGameBoardId =
+      findRoundsByGameBoardIds(
+        entities.stream().map(GameBoardEntity::getId).toList()
+      );
+
+    return entities.stream()
+      .map(entity -> entity.toDomain(
+        roundsByGameBoardId.getOrDefault(entity.getId(), List.of())
+      ))
       .toList();
   }
 
-  private PlayerEntity findPlayerEntity(Player player) {
-    return playerJPARepository
-      .findByEmail(player.getEmail().value())
-      .orElseThrow(() ->
-        PLAYER_ENTITY_NOT_FOUND.createException()
-      );
+  private void appendNewRounds(
+    Long gameBoardId,
+    List<Round> domainRounds
+  ) {
+    int savedRoundCount = countRoundsByGameBoardId(gameBoardId);
+
+    domainRounds.stream()
+      .skip(savedRoundCount)
+      .map(round -> GameBoardRoundEntity.create(gameBoardId, round))
+      .forEach(entityManager::persist);
   }
 
-  private PlayerEntity findPlayerEntity(Nickname nickname) {
-    return playerJPARepository
-      .findByNickname(nickname.value())
-      .orElseThrow(() ->
-        PLAYER_ENTITY_NOT_FOUND.createException()
-      );
+  private int countRoundsByGameBoardId(Long gameBoardId) {
+    Long count = entityManager.createQuery(
+      """
+      SELECT COUNT(round)
+      FROM GameBoardRoundEntity round
+      WHERE round.gameBoardId = :gameBoardId
+      """,
+      Long.class
+    ).setParameter("gameBoardId", gameBoardId)
+      .getSingleResult();
+
+    return count.intValue();
   }
 
-  private WordleGameEntity findGameEntity(WordleGame game) {
-    return wordleGameJPARepository
-      .findByStartAt(game.getStart())
-      .orElseThrow(() ->
-        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
-      );
+  private List<Round> findRoundsByGameBoardId(Long gameBoardId) {
+    return findRoundEntitiesByGameBoardIds(List.of(gameBoardId))
+      .stream()
+      .map(GameBoardRoundEntity::toDomain)
+      .toList();
   }
 
-  private WordleGameEntity findGameEntity(LocalDateTime endAt) {
-    return wordleGameJPARepository
-      .findByEndAt(endAt)
-      .orElseThrow(() ->
-        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
-      );
+  private Map<Long, List<Round>> findRoundsByGameBoardIds(
+    List<Long> gameBoardIds
+  ) {
+    if (gameBoardIds.isEmpty()) {
+      return Map.of();
+    }
+
+    return findRoundEntitiesByGameBoardIds(gameBoardIds)
+      .stream()
+      .collect(Collectors.groupingBy(
+        GameBoardRoundEntity::getGameBoardId,
+        HashMap::new,
+        Collectors.mapping(GameBoardRoundEntity::toDomain, Collectors.toList())
+      ));
   }
 
-  private PlayerEntity findPlayerEntity(Long playerId) {
-    return playerJPARepository
-      .findById(playerId)
-      .orElseThrow(() ->
-        PLAYER_ENTITY_NOT_FOUND.createException()
-      );
-  }
-
-  private WordleGameEntity findGameEntity(Long wordleGameId) {
-    return wordleGameJPARepository
-      .findById(wordleGameId)
-      .orElseThrow(() ->
-        WORDLE_GAME_ENTITY_NOT_FOUND.createException()
-      );
-  }
-
-  private GameBoard toDomain(GameBoardEntity entity) {
-    return entity.toDomain(
-      findPlayerEntity(entity.getPlayerId()),
-      findGameEntity(entity.getWordleGameId())
-    );
+  private List<GameBoardRoundEntity> findRoundEntitiesByGameBoardIds(
+    List<Long> gameBoardIds
+  ) {
+    return entityManager.createQuery(
+      """
+      SELECT round
+      FROM GameBoardRoundEntity round
+      WHERE round.gameBoardId IN :gameBoardIds
+      ORDER BY round.gameBoardId ASC, round.roundIndex ASC
+      """,
+      GameBoardRoundEntity.class
+    ).setParameter("gameBoardIds", gameBoardIds)
+      .getResultList();
   }
 
   private SqlParameterSource toStatusUpdateParameter(GameBoard gameBoard) {
-    PlayerEntity playerEntity = findPlayerEntity(gameBoard.getNickname());
-    WordleGameEntity gameEntity = findGameEntity(gameBoard.getDeadLine());
-
     return new MapSqlParameterSource()
       .addValue("status", gameBoard.getStatus().name())
-      .addValue("playerId", playerEntity.getId())
-      .addValue("wordleGameId", gameEntity.getId());
+      .addValue("playerId", gameBoard.getPlayerId())
+      .addValue("wordleGameId", gameBoard.getWordleGameId());
   }
 }

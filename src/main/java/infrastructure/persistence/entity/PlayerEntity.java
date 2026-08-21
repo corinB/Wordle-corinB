@@ -51,7 +51,8 @@ public class PlayerEntity {
   }
 
   public Player toDomain() {
-    return Player.create(
+    return Player.restore(
+      id,
       new Nickname(nickname),
       new Email(email),
       new EncodedPassword(encodedPassword)

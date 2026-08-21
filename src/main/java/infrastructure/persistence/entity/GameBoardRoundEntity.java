@@ -4,12 +4,9 @@ import domain.vo.Round;
 import domain.vo.Word;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -32,9 +29,8 @@ public class GameBoardRoundEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "game_board_id", nullable = false)
-  private GameBoardEntity gameBoard;
+  @Column(name = "game_board_id", nullable = false)
+  private Long gameBoardId;
 
   @Column(name = "round_index", nullable = false)
   private int roundIndex;
@@ -46,11 +42,11 @@ public class GameBoardRoundEntity {
   private String compare;
 
   public static GameBoardRoundEntity create(
-    GameBoardEntity gameBoard,
+    Long gameBoardId,
     Round round
   ) {
     GameBoardRoundEntity entity = new GameBoardRoundEntity();
-    entity.gameBoard = gameBoard;
+    entity.gameBoardId = gameBoardId;
     entity.roundIndex = round.index();
     entity.answer = round.answer().value();
     entity.compare = round.compare();
@@ -63,5 +59,9 @@ public class GameBoardRoundEntity {
       new Word(answer),
       compare
     );
+  }
+
+  public Long getGameBoardId() {
+    return gameBoardId;
   }
 }
