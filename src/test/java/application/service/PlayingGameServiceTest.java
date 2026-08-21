@@ -52,14 +52,9 @@ class PlayingGameServiceTest {
     GameBoard gameBoard = playingGameService.joinGame(player);
 
     assertAll(
-      () -> assertThat(gameBoard.getNickname())
-        .isEqualTo(player.getNickname()),
-      () -> assertThat(gameBoard.getCorrect())
-        .isEqualTo(correct),
-      () -> assertThat(gameBoard.getDeadLine())
-        .isEqualTo(todayGame.getEnd()),
-      () -> assertThat(gameBoard.getStatus())
-        .isEqualTo(GameBoardStatus.PLAYING)
+      () -> assertThat(gameBoard.getPlayerId()).isEqualTo(player.getId()),
+      () -> assertThat(gameBoard.getWordleGameId()).isEqualTo(todayGame.getId()),
+      () -> assertThat(gameBoard.getStatus()).isEqualTo(GameBoardStatus.PLAYING)
     );
   }
 
@@ -71,14 +66,11 @@ class PlayingGameServiceTest {
     Player player = savePlayer("corinB", "corin@example.com");
     playingGameService.joinGame(player);
 
-    GameBoard gameBoard =
-      playingGameService.submitAnswer(player, correct);
+    GameBoard gameBoard = playingGameService.submitAnswer(player, correct);
 
     assertAll(
-      () -> assertThat(gameBoard.getStatus())
-        .isEqualTo(GameBoardStatus.WIN),
-      () -> assertThat(gameBoard.getSpentChance())
-        .isEqualTo(1),
+      () -> assertThat(gameBoard.getStatus()).isEqualTo(GameBoardStatus.WIN),
+      () -> assertThat(gameBoard.getSpentChance()).isEqualTo(1),
       () -> assertThat(gameBoard.getRounds())
         .extracting(round -> round.answer())
         .containsExactly(correct)
@@ -86,52 +78,66 @@ class PlayingGameServiceTest {
   }
 
   @Test
-  @DisplayName("종료 시간이 지난 진행 중인 보드를 모두 만료 처리한다")
+  @DisplayName("종료된 모든 진행 보드를 만료 처리한다")
   void expireAllEndedGames() {
-    Word correct = new Word("apple");
-    Player player = savePlayer("corinB", "corin@example.com");
-    LocalDateTime startAt = LocalDateTime.now()
+    Word firstCorrect = new Word("apple");
+    Word secondCorrect = new Word("cocoa");
+    Player firstPlayer = savePlayer("firstB", "first@example.com");
+    Player secondPlayer = savePlayer("secondB", "second@example.com");
+    LocalDateTime todayStart = LocalDateTime.now()
       .toLocalDate()
-      .atStartOfDay()
-      .minusDays(2);
-    WordleGame endedGame = saveGame(correct, startAt);
-    gameBoardRepository.save(new GameBoard(player, endedGame));
+      .atStartOfDay();
+    WordleGame firstEndedGame = saveGame(
+      firstCorrect,
+      todayStart.minusDays(3)
+    );
+    WordleGame secondEndedGame = saveGame(
+      secondCorrect,
+      todayStart.minusDays(2)
+    );
+    gameBoardRepository.save(new GameBoard(
+      firstPlayer.getId(),
+      firstEndedGame.getId()
+    ));
+    gameBoardRepository.save(new GameBoard(
+      secondPlayer.getId(),
+      secondEndedGame.getId()
+    ));
 
     playingGameService.expireAllEndedGames();
 
-    GameBoard expiredGameBoard = gameBoardRepository
-      .findByPlayerAndGame(player, endedGame)
-      .orElseThrow();
-
     assertAll(
-      () -> assertThat(expiredGameBoard.getStatus())
-        .isEqualTo(GameBoardStatus.EXPIRED),
-      () -> assertThat(expiredGameBoard.isExpired())
-        .isTrue()
+      () -> assertThat(gameBoardRepository
+        .findByPlayerIdAndWordleGameId(
+          firstPlayer.getId(),
+          firstEndedGame.getId()
+        )
+        .orElseThrow().getStatus()).isEqualTo(GameBoardStatus.EXPIRED),
+      () -> assertThat(gameBoardRepository
+        .findByPlayerIdAndWordleGameId(
+          secondPlayer.getId(),
+          secondEndedGame.getId()
+        )
+        .orElseThrow().getStatus()).isEqualTo(GameBoardStatus.EXPIRED)
     );
   }
 
   @Test
-  @DisplayName("종료된 보드의 히스토리를 조회한다")
+  @DisplayName("종료된 보드의 히스토리를 관계 ID로 조회한다")
   void getHistory() {
     Word correct = new Word("apple");
     saveTodayGame(correct);
     Player player = savePlayer("corinB", "corin@example.com");
     playingGameService.joinGame(player);
-    GameBoard gameBoard =
-      playingGameService.submitAnswer(player, correct);
+    GameBoard gameBoard = playingGameService.submitAnswer(player, correct);
 
     GameHistory history = playingGameService.getHistory(gameBoard);
 
     assertAll(
-      () -> assertThat(history.player())
-        .isEqualTo(player.getNickname()),
-      () -> assertThat(history.correct())
-        .isEqualTo(correct),
-      () -> assertThat(history.tryCount().value())
-        .isEqualTo(1),
-      () -> assertThat(history.status())
-        .isEqualTo(GameBoardStatus.WIN)
+      () -> assertThat(history.player()).isEqualTo(player.getNickname()),
+      () -> assertThat(history.correct()).isEqualTo(correct),
+      () -> assertThat(history.tryCount().value()).isEqualTo(1),
+      () -> assertThat(history.status()).isEqualTo(GameBoardStatus.WIN)
     );
   }
 
@@ -151,11 +157,14 @@ class PlayingGameServiceTest {
   }
 
   private WordleGame saveGame(Word correct, LocalDateTime startAt) {
-    wordRepository.findByWord(correct)
+    Word savedCorrect = wordRepository.findByWord(correct)
       .orElseGet(() -> wordRepository.save(correct));
 
-    return wordleGameRepository.save(
-      WordleGame.restore(correct, startAt, startAt.plusDays(1))
-    );
+    return wordleGameRepository.save(WordleGame.restore(
+      null,
+      savedCorrect.getId(),
+      startAt,
+      startAt.plusDays(1)
+    ));
   }
 }

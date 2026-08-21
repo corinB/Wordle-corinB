@@ -2,9 +2,10 @@ package infrastructure.persistence.repository.impl;
 
 import application.WordleApplication;
 import domain.model.WordleGame;
-import domain.vo.Word;
 import domain.repository.WordleGameRepository;
+import domain.vo.Word;
 import infrastructure.persistence.entity.WordEntity;
+import infrastructure.persistence.repository.WordJPARepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
@@ -34,41 +34,39 @@ class WordleGameRepositoryImplTest {
   private TestEntityManager entityManager;
 
   @Test
-  @DisplayName("WordleGame을 저장하고 시작 시간으로 조회한다")
+  @DisplayName("WordleGame을 정답 단어 ID와 시작 시간으로 저장하고 조회한다")
   void saveAndFindByStartAt() {
-    Word correct = new Word("apple");
+    Word correct = persistWord("apple");
     LocalDateTime startAt = LocalDateTime.of(2026, 8, 9, 0, 0);
     LocalDateTime endAt = startAt.plusDays(1);
 
-    entityManager.persist(WordEntity.create(correct));
-    wordleGameRepository.save(WordleGame.restore(correct, startAt, endAt));
+    WordleGame saved = wordleGameRepository.save(
+      WordleGame.restore(null, correct.getId(), startAt, endAt)
+    );
     entityManager.flush();
     entityManager.clear();
 
-    Optional<WordleGame> foundGame =
-      wordleGameRepository.findByStartAt(startAt);
-
-    assertThat(foundGame)
-      .isPresent();
-
-    WordleGame savedGame = foundGame.get();
+    WordleGame foundGame = wordleGameRepository
+      .findByStartAt(startAt)
+      .orElseThrow();
 
     assertAll(
-      () -> assertThat(savedGame.getCorrect()).isEqualTo(correct),
-      () -> assertThat(savedGame.getStart()).isEqualTo(startAt),
-      () -> assertThat(savedGame.getEnd()).isEqualTo(endAt)
+      () -> assertThat(foundGame.getId()).isEqualTo(saved.getId()),
+      () -> assertThat(foundGame.getCorrectWordId()).isEqualTo(correct.getId()),
+      () -> assertThat(foundGame.getStart()).isEqualTo(startAt),
+      () -> assertThat(foundGame.getEnd()).isEqualTo(endAt)
     );
   }
 
   @Test
-  @DisplayName("정답 단어가 DB에 없으면 WordleGame을 저장할 수 없다")
-  void cannotSaveWithoutCorrectWord() {
-    Word correct = new Word("apple");
-    LocalDateTime startAt = LocalDateTime.of(2026, 8, 9, 0, 0);
-    WordleGame wordleGame =
-      WordleGame.restore(correct, startAt, startAt.plusDays(1));
+  @DisplayName("게임 저장소는 단어 JPA 저장소를 주입하지 않는다")
+  void doesNotDependOnWordJpaRepository() {
+    assertThat(WordleGameRepositoryImpl.class.getDeclaredFields())
+      .extracting(Field::getType)
+      .doesNotContain(WordJPARepository.class);
+  }
 
-    assertThatThrownBy(() -> wordleGameRepository.save(wordleGame))
-      .isInstanceOf(IllegalArgumentException.class);
+  private Word persistWord(String value) {
+    return entityManager.persist(WordEntity.create(new Word(value))).toDomain();
   }
 }

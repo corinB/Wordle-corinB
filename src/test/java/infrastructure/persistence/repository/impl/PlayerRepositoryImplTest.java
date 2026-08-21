@@ -55,6 +55,7 @@ class PlayerRepositoryImplTest {
     Player savedPlayer = foundPlayer.get();
 
     assertAll(
+      () -> assertThat(savedPlayer.getId()).isNotNull(),
       () -> assertThat(savedPlayer.getNickname().value())
         .isEqualTo("corinB"),
       () -> assertThat(savedPlayer.getEmail().value())

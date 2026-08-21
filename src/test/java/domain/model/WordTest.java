@@ -23,6 +23,13 @@ public class WordTest {
   }
 
   @Test
+  @DisplayName("영속 ID가 달라도 같은 단어는 동등하다")
+  void equalsByValueRegardlessOfPersistenceId() {
+    assertThat(new Word(1L, "apple"))
+      .isEqualTo(new Word(2L, "APPLE"));
+  }
+
+  @Test
   @DisplayName("영문으로만 생성 가능하며, 반드시 5글자이고 소문자로 저장된다")
   void constructorParameterValidation() {
     assertThatThrownBy(() -> new Word("appl"))

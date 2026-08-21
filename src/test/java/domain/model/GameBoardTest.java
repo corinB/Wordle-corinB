@@ -3,6 +3,7 @@ package domain.model;
 import domain.exception.GameAlreadyFinishedException;
 import domain.exception.GameNotFinishedException;
 import domain.vo.GameHistory;
+import domain.vo.Nickname;
 import domain.vo.Round;
 import domain.vo.Word;
 import org.junit.jupiter.api.DisplayName;
@@ -16,22 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class GameBoardTest {
 
-  @Test
-  @DisplayName("보드는 플레이어와 게임을 참조한다")
-  void createdBoardReferencesPlayerAndGame() {
-    Word correct = new Word("spill");
-    Player player = createPlayer();
-    WordleGame game = createGame(correct);
+  private static final Long PLAYER_ID = 1L;
+  private static final Long WORDLE_GAME_ID = 2L;
 
-    GameBoard gameBoard = new GameBoard(player, game);
+  @Test
+  @DisplayName("보드는 플레이어 ID와 게임 ID를 참조한다")
+  void createdBoardReferencesPlayerAndGameIds() {
+    GameBoard gameBoard = createBoard();
 
     assertAll(
-      () -> assertThat(gameBoard.getNickname())
-        .isEqualTo(player.getNickname()),
-      () -> assertThat(gameBoard.getCorrect())
-        .isEqualTo(correct),
-      () -> assertThat(gameBoard.getDeadLine())
-        .isEqualTo(game.getEnd())
+      () -> assertThat(gameBoard.getPlayerId()).isEqualTo(PLAYER_ID),
+      () -> assertThat(gameBoard.getWordleGameId()).isEqualTo(WORDLE_GAME_ID)
     );
   }
 
@@ -40,9 +36,9 @@ class GameBoardTest {
   void submitRecordsRoundAndKeepsPlayingState() {
     Word correct = new Word("spill");
     Word answer = new Word("hello");
-    GameBoard gameBoard = createBoard(correct);
+    GameBoard gameBoard = createBoard();
 
-    gameBoard.submit(answer);
+    gameBoard.submit(answer, correct);
 
     assertAll(
       () -> assertThat(gameBoard.getRounds())
@@ -50,8 +46,7 @@ class GameBoardTest {
         .containsExactly(answer),
       () -> assertThat(gameBoard.getRecords())
         .containsExactly(correct.compare(answer)),
-      () -> assertThat(gameBoard.getSpentChance())
-        .isEqualTo(1),
+      () -> assertThat(gameBoard.getSpentChance()).isEqualTo(1),
       () -> assertThat(gameBoard.getStatus())
         .isEqualTo(GameBoardStatus.PLAYING)
     );
@@ -60,122 +55,103 @@ class GameBoardTest {
   @Test
   @DisplayName("진행 중인 보드는 히스토리를 만들 수 없다")
   void cannotCreateHistoryWhenPlaying() {
-    GameBoard gameBoard = createBoard(new Word("spill"));
+    GameBoard gameBoard = createBoard();
 
-    assertThatThrownBy(gameBoard::getHistory)
-      .isInstanceOf(GameNotFinishedException.class);
+    assertThatThrownBy(() -> gameBoard.getHistory(
+      new Nickname("corinB"),
+      new Word("spill")
+    )).isInstanceOf(GameNotFinishedException.class);
   }
 
   @Test
   @DisplayName("정답을 제출하면 승리 상태로 종료된다")
   void submitCorrectAnswerChangesStatusToWin() {
     Word correct = new Word("spill");
-    GameBoard gameBoard = createBoard(correct);
+    GameBoard gameBoard = createBoard();
 
-    gameBoard.submit(correct);
-    GameHistory history = gameBoard.getHistory();
+    gameBoard.submit(correct, correct);
+    GameHistory history = gameBoard.getHistory(
+      new Nickname("corinB"),
+      correct
+    );
 
     assertAll(
       () -> assertThat(gameBoard.getStatus())
         .isEqualTo(GameBoardStatus.WIN),
-      () -> assertThat(gameBoard.isCorrect())
-        .isTrue(),
-      () -> assertThat(gameBoard.isFinished())
-        .isTrue(),
-      () -> assertThat(gameBoard.canSubmit())
-        .isFalse(),
-      () -> assertThat(history.tryCount().value())
-        .isEqualTo(1),
-      () -> assertThat(history.status())
-        .isEqualTo(GameBoardStatus.WIN),
-      () -> assertThatThrownBy(() -> gameBoard.submit(new Word("hello")))
-        .isInstanceOf(GameAlreadyFinishedException.class)
+      () -> assertThat(gameBoard.isCorrect()).isTrue(),
+      () -> assertThat(gameBoard.isFinished()).isTrue(),
+      () -> assertThat(gameBoard.canSubmit()).isFalse(),
+      () -> assertThat(history.tryCount().value()).isEqualTo(1),
+      () -> assertThat(history.status()).isEqualTo(GameBoardStatus.WIN),
+      () -> assertThatThrownBy(() ->
+        gameBoard.submit(new Word("hello"), correct)
+      ).isInstanceOf(GameAlreadyFinishedException.class)
     );
   }
 
   @Test
   @DisplayName("최대 기회까지 오답이면 패배 상태로 종료된다")
   void submitMaxWrongAnswersChangesStatusToLose() {
-    GameBoard gameBoard = createBoard(new Word("spill"));
+    Word correct = new Word("spill");
+    GameBoard gameBoard = createBoard();
     Word wrongAnswer = new Word("hello");
 
     for (int i = 0; i < GameBoard.MAX_CHANCE; i++) {
-      gameBoard.submit(wrongAnswer);
+      gameBoard.submit(wrongAnswer, correct);
     }
-    GameHistory history = gameBoard.getHistory();
+    GameHistory history = gameBoard.getHistory(
+      new Nickname("corinB"),
+      correct
+    );
 
     assertAll(
       () -> assertThat(gameBoard.getStatus())
         .isEqualTo(GameBoardStatus.LOSE),
-      () -> assertThat(gameBoard.isFailed())
-        .isTrue(),
-      () -> assertThat(gameBoard.isFinished())
-        .isTrue(),
-      () -> assertThat(gameBoard.canSubmit())
-        .isFalse(),
+      () -> assertThat(gameBoard.isFailed()).isTrue(),
+      () -> assertThat(gameBoard.isFinished()).isTrue(),
+      () -> assertThat(gameBoard.canSubmit()).isFalse(),
       () -> assertThat(history.tryCount().value())
         .isEqualTo(GameBoard.MAX_CHANCE),
-      () -> assertThat(history.status())
-        .isEqualTo(GameBoardStatus.LOSE),
-      () -> assertThatThrownBy(() -> gameBoard.submit(new Word("label")))
-        .isInstanceOf(GameAlreadyFinishedException.class)
+      () -> assertThat(history.status()).isEqualTo(GameBoardStatus.LOSE)
     );
   }
 
   @Test
   @DisplayName("게임 종료 시각이 지나면 만료 상태로 종료된다")
   void finishIfGameEndedChangesStatusToExpired() {
+    LocalDateTime endAt = LocalDateTime.of(2026, 8, 11, 0, 0);
     Word correct = new Word("spill");
-    LocalDateTime startAt = LocalDateTime.of(2026, 8, 10, 0, 0);
-    LocalDateTime endAt = startAt.plusDays(1);
-    GameBoard gameBoard = new GameBoard(
-      createPlayer(),
-      createGame(correct, startAt, endAt)
-    );
+    GameBoard gameBoard = createBoard();
 
-    gameBoard.finishIfGameEnded(endAt);
-    GameHistory history = gameBoard.getHistory();
+    gameBoard.finishIfGameEnded(endAt, endAt);
+    GameHistory history = gameBoard.getHistory(
+      new Nickname("corinB"),
+      correct
+    );
 
     assertAll(
       () -> assertThat(gameBoard.getStatus())
         .isEqualTo(GameBoardStatus.EXPIRED),
-      () -> assertThat(gameBoard.isExpired())
-        .isTrue(),
-      () -> assertThat(gameBoard.isFinished())
-        .isTrue(),
-      () -> assertThat(gameBoard.canSubmit())
-        .isFalse(),
-      () -> assertThat(history.tryCount().value())
-        .isZero(),
-      () -> assertThat(history.status())
-        .isEqualTo(GameBoardStatus.EXPIRED),
-      () -> assertThatThrownBy(() -> gameBoard.submit(new Word("hello")))
-        .isInstanceOf(GameAlreadyFinishedException.class)
+      () -> assertThat(gameBoard.isExpired()).isTrue(),
+      () -> assertThat(gameBoard.isFinished()).isTrue(),
+      () -> assertThat(gameBoard.canSubmit()).isFalse(),
+      () -> assertThat(history.tryCount().value()).isZero(),
+      () -> assertThat(history.status()).isEqualTo(GameBoardStatus.EXPIRED)
     );
   }
 
-  private GameBoard createBoard(Word correct) {
-    return new GameBoard(createPlayer(), createGame(correct));
-  }
-
-  private Player createPlayer() {
-    return Player.create(
-      "corinB",
-      "corin@example.com",
-      "encoded:password123"
+  @Test
+  @DisplayName("플레이어 또는 게임 ID 없이 보드를 만들 수 없다")
+  void cannotCreateBoardWithoutIds() {
+    assertAll(
+      () -> assertThatThrownBy(() -> new GameBoard(null, WORDLE_GAME_ID))
+        .isInstanceOf(IllegalArgumentException.class),
+      () -> assertThatThrownBy(() -> new GameBoard(PLAYER_ID, null))
+        .isInstanceOf(IllegalArgumentException.class)
     );
   }
 
-  private WordleGame createGame(Word correct) {
-    LocalDateTime startAt = LocalDateTime.of(2026, 8, 10, 0, 0);
-    return createGame(correct, startAt, startAt.plusDays(1));
-  }
-
-  private WordleGame createGame(
-    Word correct,
-    LocalDateTime startAt,
-    LocalDateTime endAt
-  ) {
-    return WordleGame.restore(correct, startAt, endAt);
+  private GameBoard createBoard() {
+    return new GameBoard(PLAYER_ID, WORDLE_GAME_ID);
   }
 }
