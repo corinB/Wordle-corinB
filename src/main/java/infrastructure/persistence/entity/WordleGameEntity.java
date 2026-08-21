@@ -3,12 +3,10 @@ package infrastructure.persistence.entity;
 import domain.model.WordleGame;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,9 +27,8 @@ public class WordleGameEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "correct_word_id", nullable = false)
-  private WordEntity correct;
+  @Column(name = "correct_word_id", nullable = false)
+  private Long correctWordId;
 
   @Column(name = "start_at", nullable = false, unique = true)
   private LocalDateTime startAt;
@@ -44,11 +41,10 @@ public class WordleGameEntity {
   private List<GameBoardEntity> gameBoards = new ArrayList<>();
 
   public static WordleGameEntity create(
-    WordleGame wordleGame,
-    WordEntity correctEntity
+    WordleGame wordleGame
   ) {
     WordleGameEntity entity = new WordleGameEntity();
-    entity.correct = correctEntity;
+    entity.correctWordId = wordleGame.getCorrectWordId();
     entity.startAt = wordleGame.getStart();
     entity.endAt = wordleGame.getEnd();
     return entity;
@@ -56,7 +52,8 @@ public class WordleGameEntity {
 
   public WordleGame toDomain() {
     return WordleGame.restore(
-      correct.toDomain(),
+      id,
+      correctWordId,
       startAt,
       endAt
     );

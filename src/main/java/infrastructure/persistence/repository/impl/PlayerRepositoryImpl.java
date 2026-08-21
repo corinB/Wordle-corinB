@@ -23,6 +23,12 @@ public class PlayerRepositoryImpl implements PlayerRepository {
   }
 
   @Override
+  public Optional<Player> findById(Long id) {
+    return playerJPARepository.findById(id)
+      .map(PlayerEntity::toDomain);
+  }
+
+  @Override
   public Optional<Player> findByEmail(Email email) {
     return playerJPARepository.findByEmail(email.value())
       .map(PlayerEntity::toDomain);

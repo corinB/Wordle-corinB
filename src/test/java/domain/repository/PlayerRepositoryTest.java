@@ -86,6 +86,13 @@ class PlayerRepositoryTest {
     }
 
     @Override
+    public Optional<Player> findById(Long id) {
+      return playersByEmail.values().stream()
+        .filter(player -> id.equals(player.getId()))
+        .findFirst();
+    }
+
+    @Override
     public Optional<Player> findByEmail(Email email) {
       return Optional.ofNullable(playersByEmail.get(email.value()));
     }

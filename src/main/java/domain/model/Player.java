@@ -11,11 +11,21 @@ import static domain.exception.DomainErrorType.PASSWORD_REQUIRED;
 
 public final class Player {
 
+  private final Long id;
   private final Nickname nickname;
   private final Email email;
   private final EncodedPassword encodedPassword;
 
   public Player(Nickname nickname, Email email, EncodedPassword password) {
+    this(null, nickname, email, password);
+  }
+
+  private Player(
+    Long id,
+    Nickname nickname,
+    Email email,
+    EncodedPassword password
+  ) {
     if (nickname == null) {
       throw NICKNAME_REQUIRED.createException();
     }
@@ -26,6 +36,7 @@ public final class Player {
       throw PASSWORD_REQUIRED.createException();
     }
 
+    this.id = id;
     this.nickname = nickname;
     this.email = email;
     this.encodedPassword = password;
@@ -33,6 +44,10 @@ public final class Player {
 
   public Email getEmail() {
     return email;
+  }
+
+  public Long getId() {
+    return id;
   }
 
   public Nickname getNickname() {
@@ -68,5 +83,14 @@ public final class Player {
     EncodedPassword encodedPassword
   ) {
     return new Player(nickname, email, encodedPassword);
+  }
+
+  public static Player restore(
+    Long id,
+    Nickname nickname,
+    Email email,
+    EncodedPassword encodedPassword
+  ) {
+    return new Player(id, nickname, email, encodedPassword);
   }
 }

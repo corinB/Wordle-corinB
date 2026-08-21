@@ -1,7 +1,6 @@
 package domain.model;
 
 import domain.vo.GameHistory;
-import domain.vo.Nickname;
 import domain.vo.Round;
 import domain.vo.TryCount;
 import domain.vo.Word;
@@ -14,74 +13,56 @@ import static domain.exception.DomainErrorType.ANSWER_REQUIRED;
 import static domain.exception.DomainErrorType.CURRENT_TIME_REQUIRED;
 import static domain.exception.DomainErrorType.GAME_ALREADY_FINISHED;
 import static domain.exception.DomainErrorType.GAME_NOT_FINISHED;
-import static domain.exception.DomainErrorType.GAME_REQUIRED;
-import static domain.exception.DomainErrorType.PLAYER_REQUIRED;
+import static domain.exception.DomainErrorType.CORRECT_WORD_REQUIRED;
+import static domain.exception.DomainErrorType.GAME_END_TIME_REQUIRED;
+import static domain.exception.DomainErrorType.NICKNAME_REQUIRED;
+import static domain.exception.DomainErrorType.PLAYER_ID_REQUIRED;
+import static domain.exception.DomainErrorType.WORDLE_GAME_ID_REQUIRED;
 
 public class GameBoard {
   public static final int MAX_CHANCE = 6;
 
-  private final Nickname nickname;
-  private final Word correct;
-  private final LocalDateTime deadLine;
+  private final Long playerId;
+  private final Long wordleGameId;
   private final List<Round> rounds;
   private GameBoardStatus status;
 
   private GameBoard(
-    LocalDateTime deadLine,
+    Long playerId,
+    Long wordleGameId,
     GameBoardStatus status,
-    List<Round> rounds,
-    Word correct,
-    Nickname nickname
+    List<Round> rounds
   ) {
-    this.deadLine = deadLine;
+    this.playerId = requirePlayerId(playerId);
+    this.wordleGameId = requireWordleGameId(wordleGameId);
     this.status = status;
     this.rounds = new ArrayList<>(rounds);
-    this.correct = correct;
-    this.nickname = nickname;
   }
 
-  public GameBoard(Player player, WordleGame game) {
+  public GameBoard(Long playerId, Long wordleGameId) {
     this(
-      requireGame(game).getEnd(),
+      playerId,
+      wordleGameId,
       GameBoardStatus.PLAYING,
-      new ArrayList<>(),
-      requireGame(game).getCorrect(),
-      requirePlayer(player).getNickname()
-    );
-  }
-
-  private GameBoard(
-    Player player,
-    WordleGame game,
-    List<Round> rounds,
-    GameBoardStatus status
-  ) {
-    this(
-      requireGame(game).getEnd(),
-      status,
-      rounds,
-      requireGame(game).getCorrect(),
-      requirePlayer(player).getNickname()
+      new ArrayList<>()
     );
   }
 
   public static GameBoard restore(
-    LocalDateTime deadLine,
+    Long playerId,
+    Long wordleGameId,
     GameBoardStatus status,
-    List<Round> rounds,
-    Word correct,
-    Nickname nickname
+    List<Round> rounds
   ) {
     return new GameBoard(
-      deadLine,
+      playerId,
+      wordleGameId,
       status,
-      rounds,
-      correct,
-      nickname
+      rounds
     );
   }
 
-  public void submit(Word answer) {
+  public void submit(Word answer, Word correct) {
     if (!canSubmit()) {
       throw GAME_ALREADY_FINISHED.createException();
     }
@@ -90,11 +71,15 @@ public class GameBoard {
       throw ANSWER_REQUIRED.createException();
     }
 
-    rounds.add(new Round(rounds.size(), answer, getCorrect()));
-    updateStatus(answer);
+    Word requiredCorrect = requireCorrect(correct);
+    rounds.add(new Round(rounds.size(), answer, requiredCorrect));
+    updateStatus(answer, requiredCorrect);
   }
 
-  public void finishIfGameEnded(LocalDateTime currentTime) {
+  public void finishIfGameEnded(
+    LocalDateTime currentTime,
+    LocalDateTime deadLine
+  ) {
     if (isFinished()) {
       return;
     }
@@ -103,21 +88,21 @@ public class GameBoard {
       throw CURRENT_TIME_REQUIRED.createException();
     }
 
+    if (deadLine == null) {
+      throw GAME_END_TIME_REQUIRED.createException();
+    }
+
     if (!currentTime.isBefore(deadLine)) {
       status = GameBoardStatus.EXPIRED;
     }
   }
 
-  public Nickname getNickname() {
-    return nickname;
+  public Long getPlayerId() {
+    return playerId;
   }
 
-  public Word getCorrect() {
-    return correct;
-  }
-
-  public LocalDateTime getDeadLine() {
-    return deadLine;
+  public Long getWordleGameId() {
+    return wordleGameId;
   }
 
   public List<Round> getRounds() {
@@ -158,21 +143,24 @@ public class GameBoard {
     return status;
   }
 
-  public GameHistory getHistory() {
+  public GameHistory getHistory(
+    domain.vo.Nickname nickname,
+    Word correct
+  ) {
     if (!isFinished()) {
       throw GAME_NOT_FINISHED.createException();
     }
 
     return new GameHistory(
-      correct,
-      nickname,
+      requireCorrect(correct),
+      requireNickname(nickname),
       new TryCount(rounds.size()),
       status
     );
   }
 
-  private void updateStatus(Word answer) {
-    if (getCorrect().equals(answer)) {
+  private void updateStatus(Word answer, Word correct) {
+    if (correct.equals(answer)) {
       status = GameBoardStatus.WIN;
       return;
     }
@@ -182,17 +170,33 @@ public class GameBoard {
     }
   }
 
-  private static Player requirePlayer(Player player) {
-    if (player == null) {
-      throw PLAYER_REQUIRED.createException();
+  private static Long requirePlayerId(Long playerId) {
+    if (playerId == null) {
+      throw PLAYER_ID_REQUIRED.createException();
     }
-    return player;
+    return playerId;
   }
 
-  private static WordleGame requireGame(WordleGame game) {
-    if (game == null) {
-      throw GAME_REQUIRED.createException();
+  private static Long requireWordleGameId(Long wordleGameId) {
+    if (wordleGameId == null) {
+      throw WORDLE_GAME_ID_REQUIRED.createException();
     }
-    return game;
+    return wordleGameId;
+  }
+
+  private static Word requireCorrect(Word correct) {
+    if (correct == null) {
+      throw CORRECT_WORD_REQUIRED.createException();
+    }
+    return correct;
+  }
+
+  private static domain.vo.Nickname requireNickname(
+    domain.vo.Nickname nickname
+  ) {
+    if (nickname == null) {
+      throw NICKNAME_REQUIRED.createException();
+    }
+    return nickname;
   }
 }

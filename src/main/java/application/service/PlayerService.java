@@ -58,9 +58,7 @@ public class PlayerService {
 
   public Player findByEmail(String email) {
     return playerRepository.findByEmail(new Email(email))
-      .orElseThrow(() ->
-        PLAYER_NOT_FOUND.createException()
-      );
+      .orElseThrow(PLAYER_NOT_FOUND::createException);
   }
 
   private void validateDuplicateNickname(Nickname nickname) {

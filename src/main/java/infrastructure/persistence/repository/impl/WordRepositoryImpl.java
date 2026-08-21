@@ -24,6 +24,12 @@ public class WordRepositoryImpl implements WordRepository {
   }
 
   @Override
+  public Optional<Word> findById(Long id) {
+    return wordJPARepository.findById(id)
+      .map(WordEntity::toDomain);
+  }
+
+  @Override
   public Word save(Word word) {
     return wordJPARepository.save(WordEntity.create(word)).toDomain();
   }

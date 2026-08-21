@@ -11,6 +11,8 @@ public interface WordRepository {
 
   Optional<Word> findByWord(Word word);
 
+  Optional<Word> findById(Long id);
+
   Word save(Word word);
 
   void delete(Word word);

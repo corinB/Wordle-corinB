@@ -47,11 +47,14 @@ class GameLifecycleServiceTest {
     WordleGame savedGame = wordleGameRepository
       .findByStartAt(wordleGame.getStart())
       .orElseThrow();
+    Word correct = wordRepository
+      .findById(savedGame.getCorrectWordId())
+      .orElseThrow();
 
     assertAll(
       () -> assertThat(savedGame).isNotNull(),
-      () -> assertThat(savedGame.getCorrect())
-        .isEqualTo(wordleGame.getCorrect()),
+      () -> assertThat(correct.getId())
+        .isEqualTo(savedGame.getCorrectWordId()),
       () -> assertThat(savedGame.getStart())
         .isEqualTo(wordleGame.getStart()),
       () -> assertThat(savedGame.getStart()).isEqualTo(todayStart()),

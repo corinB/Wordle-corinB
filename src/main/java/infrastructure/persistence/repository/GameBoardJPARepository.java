@@ -11,17 +11,13 @@ import java.util.Optional;
 public interface GameBoardJPARepository
   extends JpaRepository<GameBoardEntity, Long> {
 
-  @EntityGraph(attributePaths = {
-    "rounds"
-  })
+  @EntityGraph(attributePaths = "rounds")
   Optional<GameBoardEntity> findByPlayerIdAndWordleGameId(
     Long playerId,
     Long wordleGameId
   );
 
-  @EntityGraph(attributePaths = {
-    "rounds"
-  })
+  @EntityGraph(attributePaths = "rounds")
   List<GameBoardEntity> findAllByStatusAndWordleGameIdIn(
     GameBoardStatus status,
     List<Long> wordleGameIds

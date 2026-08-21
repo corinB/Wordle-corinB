@@ -13,6 +13,7 @@ public class WordEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Getter
   private Long id;
 
   @Column(name = "\"value\"", unique = true, nullable = false)
@@ -28,6 +29,6 @@ public class WordEntity {
 
   // Entity -> Domain
   public Word toDomain() {
-    return new Word(this.value);
+    return new Word(id, value);
   }
 }
