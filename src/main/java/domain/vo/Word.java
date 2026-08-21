@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import static domain.exception.DomainErrorType.INVALID_WORD;
 
-public record Word(String value) {
+public record Word(Long id, String value) {
 
   private static final String WHITE = "⬜";
   private static final String YELLOW = "🟨";
@@ -20,6 +20,24 @@ public record Word(String value) {
       throw INVALID_WORD.createException();
     }
     value = value.toLowerCase(); // 소문자 정규화
+  }
+
+  public Word(String value) {
+    this(null, value);
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof Word word && value.equals(word.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
   }
 
   //벨리데이션

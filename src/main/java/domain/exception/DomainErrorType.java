@@ -24,6 +24,26 @@ public enum DomainErrorType {
     "플레이어는 필수입니다.",
     IllegalArgumentException::new
   ),
+  PLAYER_ID_REQUIRED(
+    "플레이어 ID는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  WORDLE_GAME_ID_REQUIRED(
+    "워들 게임 ID는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  CORRECT_WORD_ID_REQUIRED(
+    "정답 단어 ID는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  CORRECT_WORD_REQUIRED(
+    "정답 단어는 필수입니다.",
+    IllegalArgumentException::new
+  ),
+  GAME_END_TIME_REQUIRED(
+    "게임 종료 시각은 필수입니다.",
+    IllegalArgumentException::new
+  ),
   ANSWER_REQUIRED(
     "답안은 필수입니다.",
     IllegalArgumentException::new
