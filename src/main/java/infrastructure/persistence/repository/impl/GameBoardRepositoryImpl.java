@@ -3,9 +3,7 @@ package infrastructure.persistence.repository.impl;
 import domain.model.GameBoard;
 import domain.model.GameBoardStatus;
 import domain.repository.GameBoardRepository;
-import domain.vo.Round;
 import infrastructure.persistence.entity.GameBoardEntity;
-import infrastructure.persistence.entity.GameBoardRoundEntity;
 import infrastructure.persistence.repository.GameBoardJPARepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +14,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -44,10 +39,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
       })
       .orElseGet(() -> GameBoardEntity.create(gameBoard));
 
-    GameBoardEntity savedEntity = gameBoardJPARepository.saveAndFlush(entity);
-    appendNewRounds(savedEntity.getId(), gameBoard.getRounds());
-
-    return savedEntity.toDomain(gameBoard.getRounds());
+    return gameBoardJPARepository.save(entity).toDomain();
   }
 
   @Override
@@ -80,7 +72,7 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
   ) {
     return gameBoardJPARepository
       .findByPlayerIdAndWordleGameId(playerId, wordleGameId)
-      .map(entity -> entity.toDomain(findRoundsByGameBoardId(entity.getId())));
+      .map(GameBoardEntity::toDomain);
   }
 
   @Override
@@ -92,86 +84,14 @@ public class GameBoardRepositoryImpl implements GameBoardRepository {
       return List.of();
     }
 
-    List<GameBoardEntity> entities = gameBoardJPARepository
+    return gameBoardJPARepository
       .findAllByStatusAndWordleGameIdIn(
         GameBoardStatus.PLAYING,
         wordleGameIds
-      );
-
-    Map<Long, List<Round>> roundsByGameBoardId =
-      findRoundsByGameBoardIds(
-        entities.stream().map(GameBoardEntity::getId).toList()
-      );
-
-    return entities.stream()
-      .map(entity -> entity.toDomain(
-        roundsByGameBoardId.getOrDefault(entity.getId(), List.of())
-      ))
-      .toList();
-  }
-
-  private void appendNewRounds(
-    Long gameBoardId,
-    List<Round> domainRounds
-  ) {
-    int savedRoundCount = countRoundsByGameBoardId(gameBoardId);
-
-    domainRounds.stream()
-      .skip(savedRoundCount)
-      .map(round -> GameBoardRoundEntity.create(gameBoardId, round))
-      .forEach(entityManager::persist);
-  }
-
-  private int countRoundsByGameBoardId(Long gameBoardId) {
-    Long count = entityManager.createQuery(
-      """
-      SELECT COUNT(round)
-      FROM GameBoardRoundEntity round
-      WHERE round.gameBoardId = :gameBoardId
-      """,
-      Long.class
-    ).setParameter("gameBoardId", gameBoardId)
-      .getSingleResult();
-
-    return count.intValue();
-  }
-
-  private List<Round> findRoundsByGameBoardId(Long gameBoardId) {
-    return findRoundEntitiesByGameBoardIds(List.of(gameBoardId))
+      )
       .stream()
-      .map(GameBoardRoundEntity::toDomain)
+      .map(GameBoardEntity::toDomain)
       .toList();
-  }
-
-  private Map<Long, List<Round>> findRoundsByGameBoardIds(
-    List<Long> gameBoardIds
-  ) {
-    if (gameBoardIds.isEmpty()) {
-      return Map.of();
-    }
-
-    return findRoundEntitiesByGameBoardIds(gameBoardIds)
-      .stream()
-      .collect(Collectors.groupingBy(
-        GameBoardRoundEntity::getGameBoardId,
-        HashMap::new,
-        Collectors.mapping(GameBoardRoundEntity::toDomain, Collectors.toList())
-      ));
-  }
-
-  private List<GameBoardRoundEntity> findRoundEntitiesByGameBoardIds(
-    List<Long> gameBoardIds
-  ) {
-    return entityManager.createQuery(
-      """
-      SELECT round
-      FROM GameBoardRoundEntity round
-      WHERE round.gameBoardId IN :gameBoardIds
-      ORDER BY round.gameBoardId ASC, round.roundIndex ASC
-      """,
-      GameBoardRoundEntity.class
-    ).setParameter("gameBoardIds", gameBoardIds)
-      .getResultList();
   }
 
   private SqlParameterSource toStatusUpdateParameter(GameBoard gameBoard) {

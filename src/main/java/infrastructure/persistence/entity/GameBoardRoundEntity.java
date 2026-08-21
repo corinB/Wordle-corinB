@@ -29,7 +29,12 @@ public class GameBoardRoundEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "game_board_id", nullable = false)
+  @Column(
+    name = "game_board_id",
+    nullable = false,
+    insertable = false,
+    updatable = false
+  )
   private Long gameBoardId;
 
   @Column(name = "round_index", nullable = false)
@@ -41,12 +46,8 @@ public class GameBoardRoundEntity {
   @Column(name = "compare", nullable = false)
   private String compare;
 
-  public static GameBoardRoundEntity create(
-    Long gameBoardId,
-    Round round
-  ) {
+  public static GameBoardRoundEntity create(Round round) {
     GameBoardRoundEntity entity = new GameBoardRoundEntity();
-    entity.gameBoardId = gameBoardId;
     entity.roundIndex = round.index();
     entity.answer = round.answer().value();
     entity.compare = round.compare();
